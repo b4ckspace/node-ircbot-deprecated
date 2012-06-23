@@ -1,5 +1,6 @@
 var irc         = require('irc');
 var util        = require('util');
+var http        = require('http');
 var mpdSocket   = require('mpdsocket');
 var mpd;
 var nick        = 'bckspctest';
@@ -36,6 +37,9 @@ var messageDispatcher=function(message, sender, to){
         break;
         case '!np':
             commands.playing(sender,to);
+        break;
+        case '!status':
+            commands.status(sender,to);
         break;
         default:
             console.log('unknown command: ' + command);
@@ -83,4 +87,33 @@ var commands={
 
                 }
             },
+    status : function(sender, to){
+                var sendto=sendToWho(sender, to);
+                //http://status.bckspc.de/status.php?response=json
+                var options = {
+                    host: 'status.bckspc.de',
+                    port: 80,
+                    path: '/status.php?response=json'
+                };
+                http.get(options, function(res) {
+                    console.log("Got response: " + res.statusCode);
+                    res.setEncoding('utf8');
+                    res.on('data', function(data){
+                        var status=JSON.parse(data);
+                        console.log("parsed status:");
+                        console.log(status);
+                        var message;
+                        if(status['all']==0){
+                            message="closed";
+                        }else{
+                            message="Open ( " + status['all'] + " )";
+                        }
+                        ircclient.say(sendto, message);
+                    });
+                }).on('error', function(e) {
+                    ircclient.say(sendto, "error fetching status :(");
+                    console.log("Got http status error error: " + e.message);
+                });
+                
+    },
 };
