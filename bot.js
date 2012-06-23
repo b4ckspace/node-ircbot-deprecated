@@ -69,7 +69,7 @@ var commands={
                         
                         if(!info['_OK']){
                             console.log('mpdc not ok: '+util.inspect(info));
-                            ircclient.say("mpd error :(");
+                            ircclient.say(sendto, "mpd error :(");
                             return;
                         }
                         
@@ -77,9 +77,10 @@ var commands={
                             ircclient.say(sendto, message);
                     });
                 }catch(e){ //connection lost
-                    ircclient.say("no connection to mpd");
+                    ircclient.say(sendto, "no connection to mpd");
                     console.log('caught exception :( :');
                     console.log(util.inspect(e));
+
                 }
             },
 };
