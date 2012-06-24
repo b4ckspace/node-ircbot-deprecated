@@ -182,7 +182,7 @@ var commands={
 
     help : function(sender, to){
                 var sendto  = sendToWho(sender, to);
-                var message = "!ping, !np, !stream, !status, !help, !add <streamurl>,  !play <streamurl> via query or channel";
+                var message = "!ping, !np, !status, !help, !add <streamurl>,  !play <streamurl> via query or channel";
                 ircclient.say(sendto, message);
             },
 };
