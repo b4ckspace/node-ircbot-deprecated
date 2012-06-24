@@ -1,11 +1,33 @@
+/* IRC SETTNGS */
+var nick        = 'bckspctest';
+var realname    = 'backspace';
+var username    = 'backspace';
+var irc_server  = 'irc.freenode.net';
+var irc_port    = 6667;
+var secure      = false;
+var ignoreSSl   = false;
+var channels    = ['#bckspctest'];
+
+/*MPD SETTINGS*/
+var mpd_host    = '10.1.20.5';
+var mpd_port    = '6600';
+
+
+
+
 var irc         = require('irc');
 var util        = require('util');
 var http        = require('http');
 var mpdSocket   = require('mpdsocket');
 var mpd;
-var nick        = 'bckspctest';
-var ircclient   = new irc.Client('irc.freenode.net', nick, {
-    channels: ['#bckspctest'],
+var ircclient   = new irc.Client( irc_server, nick, {
+    'channels'      : channels,
+    'userName'      : username,
+    'realName'      : realname,
+    'port'          : irc_port,
+    'secure'        : secure,
+    'selfSigned'    : ignoreSSl,
+    'certExpired'   : ignoreSSl,
 });
 
 /*IRC SETUP*/
@@ -22,7 +44,7 @@ ircclient.addListener('error', function(message){
 
 /* MPD SETUP*/
 var mpdInit = function(){
-    mpd = new mpdSocket('10.1.20.5', '6600');
+    mpd = new mpdSocket(mpd_host, mpd_port);
     mpd.on('close', function(){
         console.log("mpd socket closed. reconnecting");
         mpdInit();
