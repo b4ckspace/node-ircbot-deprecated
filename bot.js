@@ -32,7 +32,9 @@ mpdInit();
 
 /*code*/
 var messageDispatcher=function(message, sender, to){
-    var command=message.split(' ')[0];
+    var args=message.split(' ');
+    var command=args[0];
+    
     switch(command){
         case '!ping':
             commands.pong(sender,to);
@@ -45,6 +47,9 @@ var messageDispatcher=function(message, sender, to){
         break;
         case '!help':
             commands.help(sender,to);
+        break;
+        case '!add':
+            commands.add(sender,to, args[1]);
         break;
         default:
             console.log('unknown command: ' + command);
@@ -121,9 +126,21 @@ var commands={
                 });
                 
             },
-    help : function(sender, to){
+    add : function(sender, to, media){
                 var sendto=sendToWho(sender, to);
-                var message = "!ping, !np, !status, !help via query or channel";
+                try{
+                    mpd.send( ('add '+streamurl), function(info) {
+                        console.log("added to playlist");
+                        console.log(util.inspect(info));
+                    });
+                }catch(e){
+                    ircclient.say(sendto, "error adding item to playlist :(");
+                    console.log("Got http status error error: " + e.message);
+                }
+            },
+    help : function(sender, to){
+                var sendto  = sendToWho(sender, to);
+                var message = "!ping, !np, !status, !help, !add <streamurl> via query or channel";
                 ircclient.say(sendto, message);
             },
 };
