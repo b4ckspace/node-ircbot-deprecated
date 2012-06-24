@@ -11,7 +11,9 @@ var ircclient   = new irc.Client('irc.freenode.net', nick, {
 /*IRC SETUP*/
 ircclient.addListener('message', function (from, to, message) {
     console.log(from + ' => ' + to + ': ' + message);
-    messageDispatcher(message, from, to);
+    if(from!=nick){
+        messageDispatcher(message, from, to);
+    }
 });
 ircclient.addListener('error', function(message){
     console.log('ERROR: '+ util.inspect(message));
@@ -41,6 +43,9 @@ var messageDispatcher=function(message, sender, to){
         case '!status':
             commands.status(sender,to);
         break;
+        case '!help':
+            commands.help(sender,to);
+        break;
         default:
             console.log('unknown command: ' + command);
         break;
@@ -60,7 +65,7 @@ var commands={
     pong :  function(sender, to){
                 var message =  'pong'
                 var sendto  =  sendToWho(sender, to);
-                if(sendto == sender){
+                if(sendto != sender){
                     message = sender + " " + message;
                 }
 
@@ -106,7 +111,7 @@ var commands={
                         if(status['all']==0){
                             message="closed";
                         }else{
-                            message="Open ( " + status['all'] + " )";
+                            message="Open (" + status['all'] + ")";
                         }
                         ircclient.say(sendto, message);
                     });
@@ -115,5 +120,10 @@ var commands={
                     console.log("Got http status error error: " + e.message);
                 });
                 
-    },
+            },
+    help : function(sender, to){
+                var sendto=sendToWho(sender, to);
+                var message = "!ping, !np, !status, !help via query or channel";
+                ircclient.say(sendto, message);
+            },
 };
