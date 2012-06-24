@@ -40,6 +40,7 @@ var messageDispatcher=function(message, sender, to){
             commands.pong(sender,to);
         break;
         case '!np':
+        case '!stream':
             commands.playing(sender,to);
         break;
         case '!status':
@@ -50,6 +51,9 @@ var messageDispatcher=function(message, sender, to){
         break;
         case '!add':
             commands.add(sender,to, args[1]);
+        break;
+        case '!play':
+            commands.play(sender,to, args[1]);
         break;
         default:
             console.log('unknown command: ' + command);
@@ -129,7 +133,7 @@ var commands={
     add : function(sender, to, media){
                 var sendto=sendToWho(sender, to);
                 try{
-                    mpd.send( ('add '+streamurl), function(info) {
+                    mpd.send( ('add '+media), function(info) {
                         console.log("added to playlist");
                         console.log(util.inspect(info));
                     });
@@ -138,9 +142,26 @@ var commands={
                     console.log("Got mpd exception: " + e.message);
                 }
             },
+    play : function(sender, to, media){
+                var sendto=sendToWho(sender, to);
+                try{
+                    mpd.send( ('addid '+media), function(info) {
+                        console.log("added to playlist");
+                        console.log(util.inspect(info));
+                        mpd.send( ('playid '+info.Id), function(info) {
+                            console.log("playing");
+                            console.log(util.inspect(info));
+                        });
+                    });
+                }catch(e){
+                    ircclient.say(sendto, "error adding item to playlist :(");
+                    console.log("Got mpd exception: " + e.message);
+                }
+            },
+
     help : function(sender, to){
                 var sendto  = sendToWho(sender, to);
-                var message = "!ping, !np, !status, !help, !add <streamurl> via query or channel";
+                var message = "!ping, !np, !stream, !status, !help, !add <streamurl>,  !play <streamurl> via query or channel";
                 ircclient.say(sendto, message);
             },
 };
