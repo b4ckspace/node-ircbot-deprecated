@@ -90,6 +90,14 @@ var sendToWho=function(sender, to){
     }
 };
 
+var ircColors={
+    red : function(text){
+        return irc.colors.wrap('dark_red', text);
+    },
+    green : function(text){
+        return irc.colors.wrap('light_green', text);
+    },
+};
 
 var commands={
     pong :  function(sender, to){
@@ -139,9 +147,9 @@ var commands={
                         console.log(status);
                         var message;
                         if(status['all']==0){
-                            message="closed";
+                            message=ircColors.red("closed");
                         }else{
-                            message="Open (" + status['all'] + ")";
+                            message=ircColors.green("Open (" + status['all'] + ")");
                         }
                         ircclient.say(sendto, message);
                     });
