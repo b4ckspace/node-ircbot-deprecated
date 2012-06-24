@@ -135,7 +135,7 @@ var commands={
                     });
                 }catch(e){
                     ircclient.say(sendto, "error adding item to playlist :(");
-                    console.log("Got http status error error: " + e.message);
+                    console.log("Got mpd exception: " + e.message);
                 }
             },
     help : function(sender, to){
