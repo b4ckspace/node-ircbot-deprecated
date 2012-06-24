@@ -40,7 +40,6 @@ var messageDispatcher=function(message, sender, to){
             commands.pong(sender,to);
         break;
         case '!np':
-        case '!stream':
             commands.playing(sender,to);
         break;
         case '!status':
