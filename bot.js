@@ -36,6 +36,9 @@ ircclient.addListener('message', function (from, to, message) {
     if(from!=nick){
         messageDispatcher(message, from, to);
     }
+    if(isChannel(from, to)){
+        contentFilter(message, from, to)
+    }
 });
 ircclient.addListener('error', function(message){
     console.log('ERROR: ' + util.inspect(message));
@@ -82,11 +85,26 @@ var messageDispatcher = function(message, sender, to){
     };
 };
 
+var contentFilter = function(message, sender, channel){
+    console.log("contentfilter start");
+    for(var name in Filters){
+        Filters[name](message, sender, channel);
+    }
+};
+
 var sendToWho=function(sender, to){
-    if(to[0]=='#'){ //via channel
+    if(isChannel(sender, to)){
         return to;
-    }else{          //via query
+    }else{
         return sender;
+    }
+};
+
+var isChannel=function(sender, to){
+    if(to[0]=='#'){ //via channel
+        return true;
+    }else{          //via query
+        return false;
     }
 };
 
@@ -103,7 +121,7 @@ var commands={
     pong :  function(sender, to){
                 var message =  'pong'
                 var sendto  =  sendToWho(sender, to);
-                if(sendto != sender){
+                if(isChannel(sender, to)){
                     message = sender + " " + message;
                 }
 
@@ -193,4 +211,15 @@ var commands={
                 var message = "!ping, !np, !status, !help, !add <streamurl>,  !play <streamurl> via query or channel";
                 ircclient.say(sendto, message);
             },
+};
+
+var Filters={
+    plenking :  function(message, sender, to){
+                    console.log("plenking test start");
+                    var expr = /\s{2,}/g ;
+                    var hits = message.match(expr);
+                    if( hits && (hits.length>2) ){
+                        ircclient.send("kick", to, sender, "plenking");
+                    }
+                },
 };
