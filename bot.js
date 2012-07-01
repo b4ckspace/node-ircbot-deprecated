@@ -7,7 +7,7 @@ var irc_port    = 7666;
 var ircpass     = undefined;
 var secure      = false;
 var ignoreSsl   = false;
-var channels    = ['#bckspctest'];
+var channels    = ['#backspace'];
 var statusTime  = 1*60*1000; 
 
 /*MPD SETTINGS*/
