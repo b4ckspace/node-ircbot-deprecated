@@ -7,6 +7,7 @@ var irc_port    = 6667;
 var secure      = false;
 var ignoreSsl   = false;
 var channels    = ['#bckspctest'];
+var statusTime  = 1*60*1000; 
 
 /*MPD SETTINGS*/
 var mpd_host    = '10.1.20.5';
@@ -20,6 +21,10 @@ var util        = require('util');
 var http        = require('http');
 var mpdSocket   = require('mpdsocket');
 var mpd;
+var lastStatus  = false;
+
+
+/*IRC SETUP*/
 var ircclient   = new irc.Client( irc_server, nick, {
     'channels'      : channels,
     'userName'      : username,
@@ -30,9 +35,7 @@ var ircclient   = new irc.Client( irc_server, nick, {
     'certExpired'   : ignoreSsl,
 });
 
-/*IRC SETUP*/
 ircclient.addListener('message', function (from, to, message) {
-    console.log(from + ' => ' + to + ': ' + message);
     if(from!=nick){
         messageDispatcher(message, from, to);
     }
@@ -79,36 +82,24 @@ var messageDispatcher = function(message, sender, to){
         case '!play':
             commands.play(sender, to, args[1]);
         break;
-        default:
-            console.log('unknown command: ' + command);
-        break;
     };
 };
 
 var contentFilter = function(message, sender, channel){
-    console.log("contentfilter start");
     for(var name in Filters){
         Filters[name](message, sender, channel);
     }
 };
 
-var sendToWho=function(sender, to){
-    if(isChannel(sender, to)){
-        return to;
-    }else{
-        return sender;
-    }
+var sendToWho = function(sender, to){
+    return isChannel(sender, to) ? to : sender;
 };
 
-var isChannel=function(sender, to){
-    if(to[0]=='#'){ //via channel
-        return true;
-    }else{          //via query
-        return false;
-    }
+var isChannel = function(sender, to){
+    return to[0]=='#';
 };
 
-var ircColors={
+var ircColors = {
     red : function(text){
         return irc.colors.wrap('dark_red', text);
     },
@@ -117,7 +108,30 @@ var ircColors={
     },
 };
 
-var commands={
+var updateSpaceStatus = function(){
+    console.log("update status");
+    var options = {
+        host: 'status.bckspc.de',
+        port: 80,
+        path: '/status.php?response=json'
+    };
+    http.get(options, function(res) {
+        res.setEncoding('utf8');
+        res.on('data', function(data){
+            lastStatus = JSON.parse(data);
+        });
+    }).on('error', function(e) {
+        console.log("Got http status error error: " + e.message);
+    });
+    setTimeout(updateSpaceStatus, statusTime);
+};
+updateSpaceStatus();
+
+var isOpen = function(){
+    return lastStatus['all']!=0
+};
+
+var commands = {
     pong :  function(sender, to){
                 var message =  'pong'
                 var sendto  =  sendToWho(sender, to);
@@ -139,7 +153,7 @@ var commands={
                         }
                         
                         var message = "NP: " + info['Artist'] + ' - ' + info['Title'];
-                            ircclient.say(sendto, message);
+                        ircclient.say(sendto, message);
                     });
                 }catch(e){ //connection lost
                     ircclient.say(sendto, "no connection to mpd");
@@ -150,37 +164,19 @@ var commands={
             },
     status : function(sender, to){
                 var sendto = sendToWho(sender, to);
-                //http://status.bckspc.de/status.php?response=json
-                var options = {
-                    host: 'status.bckspc.de',
-                    port: 80,
-                    path: '/status.php?response=json'
-                };
-                http.get(options, function(res) {
-                    console.log("Got response: " + res.statusCode);
-                    res.setEncoding('utf8');
-                    res.on('data', function(data){
-                        var status = JSON.parse(data);
-                        console.log("parsed status:");
-                        console.log(status);
-                        var message;
-                        if(status['all']==0){
-                            message = ircColors.red("closed");
-                        }else{
-                            message = ircColors.green("open (" + status['all'] + ")");
-                        }
-                        ircclient.say(sendto, message);
-                    });
-                }).on('error', function(e) {
-                    ircclient.say(sendto, "error fetching status :(");
-                    console.log("Got http status error error: " + e.message);
-                });
+                var message;
+                if(isOpen()){
+                    message = ircColors.green("open (" + lastStatus['all'] + ")");
+                }else{
+                    message = ircColors.red("closed");
+                }
+                ircclient.say(sendto, message);
                 
             },
     add : function(sender, to, media){
                 var sendto = sendToWho(sender, to);
                 try{
-                    mpd.send( ('add '+media), function(info) {
+                    mpd.send( ('add ' + media), function(info) {
                         console.log("added to playlist");
                         console.log(util.inspect(info));
                     });
@@ -213,12 +209,12 @@ var commands={
             },
 };
 
-var Filters={
+var Filters = {
     plenking :  function(message, sender, to){
-                    console.log("plenking test start");
                     var expr = /\s{2,}/g ;
                     var hits = message.match(expr);
-                    if( hits && (hits.length>2) ){
+                    if( hits && (hits.length>=2) ){
+                        console.log("plenking detected. channel:" + to + " user: " + sender);
                         ircclient.send("kick", to, sender, "plenking");
                     }
                 },
