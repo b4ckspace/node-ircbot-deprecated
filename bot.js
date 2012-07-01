@@ -1,9 +1,10 @@
 /* IRC SETTNGS */
-var nick        = 'bckspctest';
-var realname    = 'backspace';
-var username    = 'backspace';
-var irc_server  = 'irc.freenode.net';
-var irc_port    = 6667;
+var nick        = 'b4ckspace';
+var realname    = 'b4ckspace';
+var username    = 'b4ckspace';
+var irc_server  = '127.0.0.1';
+var irc_port    = 7666;
+var ircpass     = undefined;
 var secure      = false;
 var ignoreSsl   = false;
 var channels    = ['#bckspctest'];
@@ -34,6 +35,7 @@ var ircclient   = new irc.Client( irc_server, nick, {
     'secure'        : secure,
     'selfSigned'    : ignoreSsl,
     'certExpired'   : ignoreSsl,
+    'password'      : ircpass,
 });
 
 ircclient.addListener('message', function (from, to, message) {
