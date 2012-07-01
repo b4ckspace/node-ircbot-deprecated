@@ -21,7 +21,8 @@ var util        = require('util');
 var http        = require('http');
 var mpdSocket   = require('mpdsocket');
 var mpd;
-var lastStatus  = false;
+var lastStatusData  = false;
+var wasOpen     = false;
 
 
 /*IRC SETUP*/
@@ -118,7 +119,8 @@ var updateSpaceStatus = function(){
     http.get(options, function(res) {
         res.setEncoding('utf8');
         res.on('data', function(data){
-            lastStatus = JSON.parse(data);
+            lastStatusData = JSON.parse(data);
+            wasOpen = isOpen();
         });
     }).on('error', function(e) {
         console.log("Got http status error error: " + e.message);
@@ -128,7 +130,7 @@ var updateSpaceStatus = function(){
 updateSpaceStatus();
 
 var isOpen = function(){
-    return lastStatus['all']!=0
+    return lastStatusData['all']!=0
 };
 
 var commands = {
@@ -166,7 +168,7 @@ var commands = {
                 var sendto = sendToWho(sender, to);
                 var message;
                 if(isOpen()){
-                    message = ircColors.green("open (" + lastStatus['all'] + ")");
+                    message = ircColors.green("open (" + lastStatusData['all'] + ")");
                 }else{
                     message = ircColors.red("closed");
                 }
@@ -219,3 +221,29 @@ var Filters = {
                     }
                 },
 };
+
+var autoActions = {
+    statusChange : function(){
+        var newStatus = isOpen();
+        if(newStatus != wasOpen){
+            wasOpen = newStatus;
+            var message = "new status: ";
+            if(newStatus){
+                message += ircColors.green("open (" + lastStatusData['all'] + ")");
+            }else{
+                message += ircColors.red("closed");
+            }
+            for(var k in channels){
+                ircclient.say(channels[k], message);
+            }
+        };
+    }, 
+};
+
+var runAutoActions = function(){
+    for(var k in autoActions){
+        autoActions[k]();
+    }
+    setTimeout(runAutoActions, 1000);
+};
+runAutoActions();
