@@ -23,7 +23,7 @@ var http        = require('http');
 var mpdSocket   = require('mpdsocket');
 var mpd;
 var lastStatusData  = false;
-var wasOpen     = false;
+var wasOpen     = undefined;
 
 
 /*IRC SETUP*/
@@ -42,7 +42,7 @@ ircclient.addListener('message', function (from, to, message) {
     if(from!=nick){
         messageDispatcher(message, from, to);
     }
-    if(isChannel(from, to)){
+    if(isChannel(from, to) && (from!=nick) ){
         contentFilter(message, from, to)
     }
 });
@@ -132,7 +132,7 @@ var updateSpaceStatus = function(){
 updateSpaceStatus();
 
 var isOpen = function(){
-    return lastStatusData['all']!=0
+    return lastStatusData['all']>0;
 };
 
 var commands = {
@@ -227,7 +227,7 @@ var Filters = {
 var autoActions = {
     statusChange : function(){
         var newStatus = isOpen();
-        if(newStatus != wasOpen){
+        if( (newStatus != wasOpen)&&(wasOpen!=undefined)) {
             wasOpen = newStatus;
             var message = "new status: ";
             if(newStatus){
