@@ -14,7 +14,7 @@ var statusTime  = 1*60*1000;
 var mpd_host    = '10.1.20.5';
 var mpd_port    = '6600';
 
-
+var plenkingWait = 30*60*1000;//30min
 
 
 var irc         = require('irc');
@@ -213,13 +213,26 @@ var commands = {
             },
 };
 
+var plenkers={};
+
 var Filters = {
     plenking :  function(message, sender, to){
                     var expr = /\s{2,}/g ;
                     var hits = message.match(expr);
                     if( hits && (hits.length>=2) ){
-                        console.log("plenking detected. channel:" + to + " user: " + sender);
-                        ircclient.send("kick", to, sender, "plenking");
+                        if(plenkers[sender]){
+                            ircclient.send("kick", to, sender, "plenking");
+                        }else{
+                            var message = sender + " bitte hier kein plenking.";
+                            ircclient.say(to, message);
+                            plenkers[sender] = true;
+                            setTimeout(function(){
+                                plenkers[sender] = undefined;
+                                console.log("plenking cleared: "+sender);
+                            },plenkingWait);
+                        }
+                        //console.log("plenking detected. channel:" + to + " user: " + sender);
+                        
                     }
                 },
 };
@@ -237,7 +250,7 @@ var autoActions = {
             for(var k in channels){
                 ircclient.say(channels[k], message);
             }
-        };
+        }
         wasOpen = newStatus;
     }, 
 };
@@ -249,3 +262,5 @@ var runAutoActions = function(){
     setTimeout(runAutoActions, 1000);
 };
 runAutoActions();
+
+
