@@ -228,7 +228,6 @@ var autoActions = {
     statusChange : function(){
         var newStatus = isOpen();
         if( (newStatus != wasOpen)&&(wasOpen!=undefined)) {
-            wasOpen = newStatus;
             var message = "new status: ";
             if(newStatus){
                 message += ircColors.green("open (" + lastStatusData['all'] + ")");
@@ -239,6 +238,7 @@ var autoActions = {
                 ircclient.say(channels[k], message);
             }
         };
+        wasOpen = newStatus;
     }, 
 };
 
