@@ -246,37 +246,22 @@ var Filters = {
 
 var autoActions = {
     statusChange : function(){
-        var newStatus = isOpen();
-        if( (newStatus != wasOpen)&&(wasOpen!=undefined)) {
-            var message = "new status: ";
-            if(newStatus){
-                message += ircColors.green("open (" + lastStatusData['all'] + ")");
-            }else{
-                message += ircColors.red("closed");
-            }
-            for(var k in channels){
-                ircclient.say(channels[k], message);
-            }
+    var newStatus = isOpen();
+    if(newStatus){
+        message = "open";
+    }else{
+        message = "closed";
+    }
+    var topicExpr=/open|closed/g;
+    for(var k in channels){
+        var channel = channels[k];
+        if(!topics[channel])
+            continue;
+        var newTopic = topics[channel].replace(topicExpr, message);
+        if(newTopic != topics[channel]){
+            ircclient.send("topic", channel, newTopic);
         }
-        wasOpen = newStatus;
-    },
-    roomstatus : function(){
-        var status;
-        if(isOpen()){
-            status = "open(" + lastStatusData['all'] + ")";
-        }else{
-            status = "closed";
-        }
-        var topicExpr=/open\(\d*\)|closed/g;
-        for(var k in channels){
-            var channel = channels[k];
-            if(!topics[channel])
-                continue;
-            var newTopic = topics[channel].replace(topicExpr, status);
-            if(newTopic != topics[channel]){
-                ircclient.send("topic", channel, newTopic);
-            }
-        }
+    }
     },
 };
 
