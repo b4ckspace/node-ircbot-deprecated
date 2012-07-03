@@ -213,7 +213,7 @@ var commands = {
 
     help : function(sender, to){
                 var sendto  = sendToWho(sender, to);
-                var message = "!ping, !np, !status, !help, !add <streamurl>,  !play <streamurl> via query or channel";
+                var message = "see https://github.com/b4ckspace/ircbot";
                 ircclient.say(sendto, message);
             },
 };
