@@ -1,0 +1,32 @@
+{
+    "name": "ircbot",
+    "version": "0.1.0",
+    "author": "xandy <xandy@hackerspace-bamberg.de>",
+    "description": "ircbot for the backspace irc channel",
+    "contributors": [
+        {
+            "name": "xandy",
+            "email": "xandy@hackerspace-bamberg.de"
+        },
+        {
+            "name": "zaphod1984",
+            "email": "zaphod84@gmx.de"
+        }
+    ],
+    "main": "./bot.js",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/b4ckspace/ircbot.git"
+    },
+    "keywords": [
+        "irc",
+        "bot"
+    ],
+    "dependencies" : {
+        "irc":       "0.3.x",
+        "mpdsocket": "0.1.x"
+    },
+    "engine": {
+        "node": ">=0.6"
+    }
+}
