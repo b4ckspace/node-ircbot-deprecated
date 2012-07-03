@@ -161,7 +161,7 @@ var commands = {
                             return;
                         }
                         
-                        var message = "NP: " + info['Artist'] + ' - ' + info['Title'];
+                        var message = "NP: " + info['Artist'] + ' - ' + info['Title'] + '(' + info['file'] + ')';
                         ircclient.say(sendto, message);
                     });
                 }catch(e){ //connection lost
