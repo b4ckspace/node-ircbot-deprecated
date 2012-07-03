@@ -24,7 +24,7 @@ var mpdSocket   = require('mpdsocket');
 var mpd;
 var lastStatusData  = false;
 var wasOpen     = undefined;
-
+var topics      = {};
 
 /*IRC SETUP*/
 var ircclient   = new irc.Client( irc_server, nick, {
@@ -49,7 +49,9 @@ ircclient.addListener('message', function (from, to, message) {
 ircclient.addListener('error', function(message){
     console.log('ERROR: ' + util.inspect(message));
 });
-
+ircclient.addListener('topic', function (channel, topic, nick, message){
+    topics[channel] = topic;
+});
 
 /* MPD SETUP*/
 var mpdInit = function(){
@@ -257,14 +259,32 @@ var autoActions = {
             }
         }
         wasOpen = newStatus;
-    }, 
+    },
+    roomstatus : function(){
+        var status;
+        if(isOpen()){
+            status = "open(" + lastStatusData['all'] + ")";
+        }else{
+            status = "closed";
+        }
+        var topicExpr=/open\(\d*\)|closed/g;
+        for(var k in channels){
+            var channel = channels[k];
+            if(!topics[channel])
+                continue;
+            var newTopic = topics[channel].replace(topicExpr, status);
+            if(newTopic != topics[channel]){
+                ircclient.send("topic", channel, newTopic);
+            }
+        }
+    },
 };
 
 var runAutoActions = function(){
     for(var k in autoActions){
         autoActions[k]();
     }
-    setTimeout(runAutoActions, 1000);
+    setTimeout(runAutoActions, 2000);
 };
 runAutoActions();
 
