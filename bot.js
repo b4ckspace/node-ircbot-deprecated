@@ -139,7 +139,7 @@ var updateSpaceStatus = function(){
 updateSpaceStatus();
 
 var isOpen = function(){
-    return lastStatusData['all']>0;
+    return lastStatusData['members']>0;
 };
 
 var commands = {
@@ -177,7 +177,7 @@ var commands = {
                 var sendto = sendToWho(sender, to);
                 var message;
                 if(isOpen()){
-                    message = ircColors.green("open (" + lastStatusData['all'] + ")");
+                    message = ircColors.green("open (" + lastStatusData['members'] + ")");
                 }else{
                     message = ircColors.red("closed");
                 }
