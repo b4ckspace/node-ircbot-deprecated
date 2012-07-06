@@ -19,12 +19,13 @@ var plenkingWait = 30*60*1000;//30min
 
 var irc         = require('irc');
 var util        = require('util');
-var http        = require('http');
 var mpdSocket   = require('mpdsocket');
+var bckspcApi   = require('./bckspcapi.js');
 var mpd;
 var lastStatusData  = false;
 var wasOpen     = undefined;
 var topics      = {};
+
 
 /*IRC SETUP*/
 var ircclient   = new irc.Client( irc_server, nick, {
@@ -53,6 +54,27 @@ ircclient.addListener('topic', function (channel, topic, nick, message){
     topics[channel] = topic;
 });
 
+/* SPACE API SETUP*/
+var spaceApi    = new bckspcApi();
+spaceApi.on('openclose', function(open){
+    var newStatus = open;
+    if(newStatus){
+        message = "open";
+    }else{
+        message = "closed";
+    }
+    var topicExpr=/open|closed/g;
+    for(var k in channels){
+        var channel = channels[k];
+        if(!topics[channel])
+            continue;
+        var newTopic = topics[channel].replace(topicExpr, message);
+        if(newTopic != topics[channel]){
+            ircclient.send("topic", channel, newTopic);
+        }
+    }
+});
+
 /* MPD SETUP*/
 var mpdInit = function(){
     console.log("mpd (re) connect");
@@ -66,7 +88,7 @@ var mpdInit = function(){
         setTimeout(mpdInit, 10000);
     });
 };
-mpdInit();
+//mpdInit();
 
 /*code*/
 var messageDispatcher = function(message, sender, to){
@@ -101,25 +123,6 @@ var ircColors = {
     },
 };
 
-var updateSpaceStatus = function(){
-    console.log("update status");
-    var options = {
-        host: 'status.bckspc.de',
-        port: 80,
-        path: '/status.php?response=json'
-    };
-    http.get(options, function(res) {
-        res.setEncoding('utf8');
-        res.on('data', function(data){
-            lastStatusData = JSON.parse(data);
-            wasOpen = isOpen();
-        });
-    }).on('error', function(e) {
-        console.log("Got http status error error: " + e.message);
-    });
-    setTimeout(updateSpaceStatus, statusTime);
-};
-updateSpaceStatus();
 
 var isOpen = function(){
     return lastStatusData['members']>0;
@@ -146,7 +149,9 @@ var commands = {
                             return;
                         }
                         
-                        var message = "NP: " + info['Artist'] + ' - ' + info['Title'] + '(' + info['file'] + ')';
+                        var message =   "NP: " + 
+                                        info['Artist'] + ' - ' + info['Title'] + 
+                                        '(' + info['file'] + ')';
                         ircclient.say(sendto, message);
                     });
                 }catch(e){ //connection lost
@@ -159,8 +164,8 @@ var commands = {
     '!status' : function(sender, to){
                 var sendto = sendToWho(sender, to);
                 var message;
-                if(isOpen()){
-                    message = ircColors.green("open (" + lastStatusData['members'] + ")");
+                if(spaceApi.isOpen()){
+                    message = ircColors.green("open (" + spaceApi.openCount() + ")");
                 }else{
                     message = ircColors.red("closed");
                 }
@@ -195,7 +200,6 @@ var commands = {
                     console.log("Got mpd exception: " + e.message);
                 }
             },
-
     '!help' : function(sender, to){
                 var sendto  = sendToWho(sender, to);
                 var message = "see https://github.com/b4ckspace/ircbot";
@@ -220,40 +224,7 @@ var Filters = {
                                 plenkers[sender] = undefined;
                                 console.log("plenking cleared: "+sender);
                             },plenkingWait);
-                        }
-                        //console.log("plenking detected. channel:" + to + " user: " + sender);
-                        
+                        }  
                     }
                 },
 };
-
-var autoActions = {
-    statusChange : function(){
-    var newStatus = isOpen();
-    if(newStatus){
-        message = "open";
-    }else{
-        message = "closed";
-    }
-    var topicExpr=/open|closed/g;
-    for(var k in channels){
-        var channel = channels[k];
-        if(!topics[channel])
-            continue;
-        var newTopic = topics[channel].replace(topicExpr, message);
-        if(newTopic != topics[channel]){
-            ircclient.send("topic", channel, newTopic);
-        }
-    }
-    },
-};
-
-var runAutoActions = function(){
-    for(var k in autoActions){
-        autoActions[k]();
-    }
-    setTimeout(runAutoActions, 2000);
-};
-runAutoActions();
-
-
