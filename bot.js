@@ -88,7 +88,7 @@ var mpdInit = function(){
         setTimeout(mpdInit, 10000);
     });
 };
-//mpdInit();
+mpdInit();
 
 /*code*/
 var messageDispatcher = function(message, sender, to){
