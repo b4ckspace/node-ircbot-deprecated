@@ -13,6 +13,7 @@ bckspcApi.prototype.lastStatusData = null;
 
 bckspcApi.prototype.updateSpaceStatus = function(){
     console.log("update status");
+
     var options = {
         host: 'status.bckspc.de',
         port: 80,
@@ -30,12 +31,12 @@ bckspcApi.prototype.updateSpaceStatus = function(){
             if(status['members'] != that.lastStatus['members']){
                 that.emit('membercount', status['members']);
             }
-            if( (!status['members']) != !isOpen()){
-                that.emit('isopen', !isOpen());
-                if(status['members'] && !isOpen()){
+            if( (!status['members']) != !that.isOpen()){
+                that.emit('isopen', !that.isOpen());
+                if(status['members'] && !that.isOpen()){
                     that.emit('open');
                 }
-                if(!status['members'] && isOpen()){
+                if(!status['members'] && that.isOpen()){
                     that.emit('closed');
                 }
             }
@@ -44,9 +45,9 @@ bckspcApi.prototype.updateSpaceStatus = function(){
     }).on('error', function(e) {
         console.log("Got http status error error: " + e.message);
     });
-
-    setTimeout(this.updateSpaceStatus, this.fetchTimer);
-
+    setTimeout(function(){
+        that.updateSpaceStatus();
+    }, this.fetchTimer);
 };
 
 bckspcApi.prototype.isOpen = function(){
