@@ -1,14 +1,14 @@
+var env=process.env;
 /* IRC SETTNGS */
-var nick        = 'b4ckspace';
-var realname    = 'b4ckspace';
-var username    = 'b4ckspace';
-var irc_server  = '127.0.0.1';
-var irc_port    = 7666;
-var ircpass     = undefined;
-var secure      = false;
-var ignoreSsl   = false;
-var channels    = ['#backspace'];
-var statusTime  = 1*60*1000; 
+var nick        = env['nick']       || 'b4ckspace_bot';
+var realname    = env['realname']   || 'b4ckspace_bot';
+var username    = env['username']   || 'b4ckspace_bot';
+var irc_server  = env['irc_server'] || 'irc.freenode.net';
+var irc_port    = env['irc_port']   || 6667;
+var ircpass     = env['irc_pass']   || undefined;
+var secure      = env['irc_ssl']    || false;
+var ignoreSsl   = env['ssl_ignore'] || false;
+var channels    = env['channels'].split(',')||['#backspace'];
 
 /*MPD SETTINGS*/
 var mpd_host    = '10.1.20.5';
