@@ -72,27 +72,10 @@ mpdInit();
 var messageDispatcher = function(message, sender, to){
     var args    = message.split(' ');
     var command = args[0];
-    
-    switch(command){
-        case '!ping':
-            commands.pong(sender, to);
-        break;
-        case '!np':
-            commands.playing(sender, to);
-        break;
-        case '!status':
-            commands.status(sender, to);
-        break;
-        case '!help':
-            commands.help(sender, to);
-        break;
-        case '!add':
-            commands.add(sender, to, args[1]);
-        break;
-        case '!play':
-            commands.play(sender, to, args[1]);
-        break;
-    };
+    var fun;
+    if(fun = commands[command]){
+        fun.apply(undefined, [sender, to].concat(args.slice(1)) );
+    }
 };
 
 var contentFilter = function(message, sender, channel){
@@ -106,7 +89,7 @@ var sendToWho = function(sender, to){
 };
 
 var isChannel = function(sender, to){
-    return to[0]=='#';
+    return to && to[0]=='#';
 };
 
 var ircColors = {
@@ -143,7 +126,7 @@ var isOpen = function(){
 };
 
 var commands = {
-    pong :  function(sender, to){
+    '!ping' :  function(sender, to){
                 var message =  'pong'
                 var sendto  =  sendToWho(sender, to);
                 if(isChannel(sender, to)){
@@ -152,7 +135,7 @@ var commands = {
 
                 ircclient.say(sendto, message);
             },
-    playing : function(sender, to){
+    '!np' : function(sender, to){
                 var sendto  =  sendToWho(sender, to);
                 try{
                     mpd.send('currentsong',function(info) {
@@ -173,7 +156,7 @@ var commands = {
 
                 }
             },
-    status : function(sender, to){
+    '!status' : function(sender, to){
                 var sendto = sendToWho(sender, to);
                 var message;
                 if(isOpen()){
@@ -184,7 +167,7 @@ var commands = {
                 ircclient.say(sendto, message);
                 
             },
-    add : function(sender, to, media){
+    '!add' : function(sender, to, media){
                 var sendto = sendToWho(sender, to);
                 try{
                     mpd.send( ('add ' + media), function(info) {
@@ -196,7 +179,7 @@ var commands = {
                     console.log("Got mpd exception: " + e.message);
                 }
             },
-    play : function(sender, to, media){
+    '!play' : function(sender, to, media){
                 var sendto = sendToWho(sender, to);
                 try{
                     mpd.send( ('addid ' + media), function(info) {
@@ -213,7 +196,7 @@ var commands = {
                 }
             },
 
-    help : function(sender, to){
+    '!help' : function(sender, to){
                 var sendto  = sendToWho(sender, to);
                 var message = "see https://github.com/b4ckspace/ircbot";
                 ircclient.say(sendto, message);
