@@ -19,9 +19,24 @@ bckspcApi.prototype.updateSpaceStatus = function(){
     };
     var that=this;
     http.get(options, function(res) {
+        var resString = '';
+
         res.setEncoding('utf8');
-        res.on('data', function(data){
-            var status = JSON.parse(data);
+
+        res.on( 'data', function( data ) {
+            resString += data;
+        } );
+
+        res.on('end', function(){
+            var status;
+            try {
+                status = JSON.parse(resString);
+            }
+            catch( e ) {
+                console.log( 'json parsing error: ' + e.message );
+                return;
+            }
+
             if(!that.lastStatus){
                 that.lastStatus = status;
                 that.emit('ready', that.isOpen());
