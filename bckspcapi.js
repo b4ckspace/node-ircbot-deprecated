@@ -12,8 +12,6 @@ bckspcApi.prototype = EventEmitter.prototype;
 bckspcApi.prototype.lastStatusData = null;
 
 bckspcApi.prototype.updateSpaceStatus = function(){
-    console.log("update status");
-
     var options = {
         host: 'status.bckspc.de',
         port: 80,
@@ -31,14 +29,17 @@ bckspcApi.prototype.updateSpaceStatus = function(){
             }
             if(status['members'] != that.lastStatus['members']){
                 that.emit('membercount', status['members']);
+                console.log("emit membercount" + status['members']);
             }
-            if( (!status['members']) != !that.isOpen()){
+            if( (status['members']>0) != that.isOpen()){
                 that.emit('isopen', that.isOpen());
                 if(status['members'] && !that.isOpen()){
                     that.emit('open');
+                    console.log("emit open");
                 }
                 if(!status['members'] && that.isOpen()){
                     that.emit('closed');
+                    console.log("emit closed");
                 }
             }
             that.lastStatus = status;
