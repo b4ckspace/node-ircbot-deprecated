@@ -148,10 +148,11 @@ var commands = {
                             ircclient.say(sendto, "mpd error :(");
                             return;
                         }
-                        
-                        var message =   "NP: " + 
+                        var premium  = /http.*\?[0-9a-f]*/g;
+                        var filename = info['file'].replace(premium, "premiumstream");
+                        var message  =   "NP: " + 
                                         info['Artist'] + ' - ' + info['Title'] + 
-                                        '(' + info['file'] + ')';
+                                        '(' + filename + ')';
                         ircclient.say(sendto, message);
                     });
                 }catch(e){ //connection lost
