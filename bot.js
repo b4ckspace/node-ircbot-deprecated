@@ -77,7 +77,6 @@ spaceApi.on('openclose', function(open){
 
 /* MPD SETUP*/
 var mpdInit = function(){
-    console.log("mpd (re) connect");
     mpd = new mpdSocket(mpd_host, mpd_port);
     mpd.on('close', function(){
         mpdInit();
@@ -148,9 +147,13 @@ var commands = {
                         }
                         var premium  = /http.*\?[0-9a-f]*/g;
                         var filename = info['file'].replace(premium, "premiumstream");
-                        var message  =   "NP: " + 
-                                        info['Artist'] + ' - ' + info['Title'] + 
+                        var artist   = info['Artist'] ? info['Artist'] + " - " : "";
+                        var message  =   "now playing: " + 
+                                        artist + info['Title'] + 
                                         '(' + filename + ')';
+                        if( !info['Artist'] && !info['Title']){
+                            message  = "now playing: " + filename;
+                        }
                         ircclient.say(sendto, message);
                     });
                 }catch(e){ //connection lost
