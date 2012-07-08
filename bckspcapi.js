@@ -46,17 +46,18 @@ bckspcApi.prototype.updateSpaceStatus = function(){
                 that.emit('membercount', status['members']);
                 console.log("emit membercount" + status['members']);
             }
-            if( (status['members']>0) != that.isOpen()){
-                that.emit('isopen', that.isOpen());
-                if(status['members'] && !that.isOpen()){
-                    that.emit('open');
-                    console.log("emit open");
-                }
-                if(!status['members'] && that.isOpen()){
-                    that.emit('closed');
-                    console.log("emit closed");
-                }
+
+            if( (status['members']>0) && !that.isOpen()){
+                console.log("emit open, isopen true");
+                that.emit('isopen', true);
+                that.emit('open');
             }
+            if( (status['members']==0) && that.isOpen()){
+                console.log("emit closed, isopen false");
+                that.emit('isopen', false);
+                that.emit('closed');
+            }
+
             that.lastStatus = status;
         });
     }).on('error', function(e) {
