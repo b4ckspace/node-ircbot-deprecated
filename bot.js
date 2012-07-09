@@ -123,7 +123,7 @@ var setTopic = function(channel, isopen){
     }
     var topicExpr=/open|closed/g;
     if(!topics[channel])
-        continue;
+        return;
     var newTopic = topics[channel].replace(topicExpr, message);
     if(newTopic != topics[channel]){
         ircclient.send("topic", channel, newTopic);
