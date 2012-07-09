@@ -51,27 +51,18 @@ ircclient.addListener('error', function(message){
     console.log('ERROR: ' + util.inspect(message));
 });
 ircclient.addListener('topic', function (channel, topic, nick, message){
+    var joined = !topics[channel];
     topics[channel] = topic;
+    if(joined){
+        setTopic(topics[channel], spaceApi.isOpen());
+    }
 });
 
 /* SPACE API SETUP*/
 var spaceApi    = new bckspcApi();
 spaceApi.on('isopen', function(open){
-    var newStatus = open;
-    if(newStatus){
-        message = "open";
-    }else{
-        message = "closed";
-    }
-    var topicExpr=/open|closed/g;
     for(var k in channels){
-        var channel = channels[k];
-        if(!topics[channel])
-            continue;
-        var newTopic = topics[channel].replace(topicExpr, message);
-        if(newTopic != topics[channel]){
-            ircclient.send("topic", channel, newTopic);
-        }
+        setTopic(channels[k], open);
     }
 });
 
@@ -120,9 +111,23 @@ var ircColors = {
     },
 };
 
-
 var isOpen = function(){
     return lastStatusData['members']>0;
+};
+
+var setTopic = function(channel, isopen){
+    if(isopen){
+        message = "open";
+    }else{
+        message = "closed";
+    }
+    var topicExpr=/open|closed/g;
+    if(!topics[channel])
+        continue;
+    var newTopic = topics[channel].replace(topicExpr, message);
+    if(newTopic != topics[channel]){
+        ircclient.send("topic", channel, newTopic);
+    }
 };
 
 var commands = {
