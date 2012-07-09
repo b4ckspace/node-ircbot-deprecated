@@ -56,7 +56,7 @@ ircclient.addListener('topic', function (channel, topic, nick, message){
 
 /* SPACE API SETUP*/
 var spaceApi    = new bckspcApi();
-spaceApi.on('openclose', function(open){
+spaceApi.on('isopen', function(open){
     var newStatus = open;
     if(newStatus){
         message = "open";
