@@ -69,11 +69,11 @@ bckspcApi.prototype.updateSpaceStatus = function(){
 };
 
 bckspcApi.prototype.isOpen = function(){
-    return this.lastStatus['members'] > 0;
+    return this.lastStatus && this.lastStatus['members'] > 0;
 };
 
 bckspcApi.prototype.openCount = function(){
-    return this.lastStatus['members'];
+    return this.lastStatus && this.lastStatus['members'];
 };
 
 
