@@ -8,7 +8,7 @@ var irc_port    = env['irc_port']   || 6667;
 var ircpass     = env['irc_pass']   || undefined;
 var secure      = env['irc_ssl']    || false;
 var ignoreSsl   = env['ssl_ignore'] || false;
-var channels    = env['channels'].split(',')||['#backspace'];
+var channels    = (env['channels'] && env['channels'].split(','))||['#backspace'];
 
 /*MPD SETTINGS*/
 var mpd_host    = '10.1.20.5';
@@ -68,6 +68,7 @@ spaceApi.on('isopen', function(open){
 
 /* MPD SETUP*/
 var mpdInit = function(){
+    console.log("mpdInit");
     mpd = new mpdSocket(mpd_host, mpd_port);
     mpd.on('close', function(){
         mpdInit();
@@ -76,7 +77,7 @@ var mpdInit = function(){
         setTimeout(mpdInit, 10000);
     });
 };
-mpdInit();
+!env['nompd'] && mpdInit();
 
 /*code*/
 var messageDispatcher = function(message, sender, to){
