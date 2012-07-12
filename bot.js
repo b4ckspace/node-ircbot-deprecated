@@ -212,6 +212,10 @@ var commands = {
                 var message = "see https://github.com/b4ckspace/ircbot";
                 ircclient.say(sendto, message);
             },
+    '!pampus': function(sender, to){
+                var sendto = sendToWho(sender, to);
+                ircclient.say(sendto, 'Dem Pampus fehlt Salz!');
+            },
 };
 
 var plenkers={};
