@@ -6,9 +6,10 @@ var username    = env['username']   || 'b4ckspace_bot';
 var irc_server  = env['irc_server'] || 'irc.freenode.net';
 var irc_port    = env['irc_port']   || 6667;
 var ircpass     = env['irc_pass']   || undefined;
-var secure      = env['irc_ssl']    || false;
-var ignoreSsl   = env['ssl_ignore'] || false;
-var channels    = (env['channels'] && env['channels'].split(','))||['#backspace'];
+var secure      = env['irc_ssl']    == "true";
+var ignoreSsl   = env['ssl_ignore'] == "true";
+var channels    = (env['channels']  && env['channels'].split(','))||['#backspace'];
+var disable_mpd = env['nompd']      != "true";
 
 /*MPD SETTINGS*/
 var mpd_host    = '10.1.20.5';
@@ -22,8 +23,6 @@ var util        = require('util');
 var mpdSocket   = require('mpdsocket');
 var bckspcApi   = require('./bckspcapi.js');
 var mpd;
-var lastStatusData  = false;
-var wasOpen     = undefined;
 var topics      = {};
 
 
@@ -77,7 +76,8 @@ var mpdInit = function(){
         setTimeout(mpdInit, 10000);
     });
 };
-!env['nompd'] && mpdInit();
+if(disable_mpd)
+    mpdInit();
 
 /*code*/
 var messageDispatcher = function(message, sender, to){
@@ -112,12 +112,9 @@ var ircColors = {
     },
 };
 
-var isOpen = function(){
-    return lastStatusData['members']>0;
-};
 
 var setTopic = function(channel, isopen){
-    if(isopen){
+    if(spaceApi.isOpen()){
         message = "open";
     }else{
         message = "closed";
