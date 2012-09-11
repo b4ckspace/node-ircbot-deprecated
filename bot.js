@@ -22,6 +22,7 @@ var irc         = require('irc');
 var util        = require('util');
 var mpdSocket   = require('mpdsocket');
 var bckspcApi   = require('./bckspcapi.js');
+var exec = require('child_process').exec;
 var mpd;
 var topics      = {};
 
@@ -234,6 +235,19 @@ var commands = {
     '!pampus': function(sender, to){
                 var sendto = sendToWho(sender, to);
                 ircclient.say(sendto, 'Dem Pampus fehlt Salz!');
+            },
+    '!version': function(sender, to){
+                var sendto = sendToWho(sender, to);
+
+                exec('git describe  --always --dirty', function (e, stdout, stderr) {
+                    //console.log('stdout: ' + stdout);
+                    //console.log('stderr: ' + stderr);
+                    if (e !== null) {
+                        console.log('exec error: ' + error + "stderr: " + stderr);
+                    }else{
+                        ircclient.say(sendto, stdout);
+                    }
+                });
             },
 };
 
