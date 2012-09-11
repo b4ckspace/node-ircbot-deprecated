@@ -25,6 +25,7 @@ var bckspcApi   = require('./bckspcapi.js');
 var exec = require('child_process').exec;
 var mpd;
 var topics      = {};
+var running_version = undefined;
 
 
 /*IRC SETUP*/
@@ -81,6 +82,14 @@ if(disable_mpd)
     mpdInit();
 
 /*code*/
+exec('git describe  --always --dirty', function (e, stdout, stderr) {
+    if (e !== null) {
+        console.log('exec error: ' + error + "stderr: " + stderr);
+    }else{
+        running_version=stdout;
+    }
+});
+
 var messageDispatcher = function(message, sender, to){
     var args    = message.split(' ');
     var command = args[0];
@@ -238,16 +247,7 @@ var commands = {
             },
     '!version': function(sender, to){
                 var sendto = sendToWho(sender, to);
-
-                exec('git describe  --always --dirty', function (e, stdout, stderr) {
-                    //console.log('stdout: ' + stdout);
-                    //console.log('stderr: ' + stderr);
-                    if (e !== null) {
-                        console.log('exec error: ' + error + "stderr: " + stderr);
-                    }else{
-                        ircclient.say(sendto, stdout);
-                    }
-                });
+                ircclient.say(sendto, running_version);
             },
 };
 
