@@ -7,6 +7,7 @@
 * !playstream <streamurl>
 * !add <searchterm+>
 * !version
+* !npfile
 
 # Required packages
 * irc

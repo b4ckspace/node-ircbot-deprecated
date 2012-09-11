@@ -10,6 +10,7 @@ var secure      = env['irc_ssl']    == "true";
 var ignoreSsl   = env['ssl_ignore'] == "true";
 var channels    = (env['channels']  && env['channels'].split(','))||['#backspace'];
 var disable_mpd = env['nompd']      != "true";
+var music_baseurl = "ftp://nfs/music/";
 
 /*MPD SETTINGS*/
 var mpd_host    = '10.1.20.5';
@@ -246,6 +247,13 @@ var commands = {
                         ircclient.say(sendto, message);
                     }
                     //console.log(util.inspect(response));
+                });
+            },
+    '!npfile' : function(sender, to){
+                mpd.send('currentsong',function(response) {
+                    var sendto  = sendToWho(sender, to);
+                    var message = music_baseurl + encodeURIComponent(response['file']);
+                    ircclient.say(sendto, message);
                 });
             },
     '!help' : function(sender, to){
