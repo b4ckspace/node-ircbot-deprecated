@@ -3,8 +3,9 @@
 * !np
 * !status
 * !help
-* !add <streamurl>
-* !play <streamurl>
+* !addstream <streamurl>
+* !playstream <streamurl>
+* !add <searchterm+>
 
 # Required packages
 * irc

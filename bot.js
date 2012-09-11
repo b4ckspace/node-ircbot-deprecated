@@ -130,7 +130,7 @@ var setTopic = function(channel, isopen){
 
 var commands = {
     '!ping' :  function(sender, to){
-                var message =  'pong'
+                var message =  'pong';
                 var sendto  =  sendToWho(sender, to);
                 if(isChannel(sender, to)){
                     message = sender + " " + message;
@@ -177,7 +177,7 @@ var commands = {
                 ircclient.say(sendto, message);
                 
             },
-    '!add' : function(sender, to, media){
+    '!addstream' : function(sender, to, media){
                 var sendto = sendToWho(sender, to);
                 try{
                     mpd.send( ('add ' + media), function(info) {
@@ -189,7 +189,7 @@ var commands = {
                     console.log("Got mpd exception: " + e.message);
                 }
             },
-    '!play' : function(sender, to, media){
+    '!playstream' : function(sender, to, media){
                 var sendto = sendToWho(sender, to);
                 try{
                     mpd.send( ('addid ' + media), function(info) {
@@ -204,6 +204,27 @@ var commands = {
                     ircclient.say(sendto, "error adding item to playlist :(");
                     console.log("Got mpd exception: " + e.message);
                 }
+            },
+    '!add' : function(sender, to){
+                var args = Array.prototype.slice.call(arguments);
+                var term = args.slice(2).join(' ');
+                console.log(term);
+                mpd.send('search any "' + term + '"', function(response){
+                    if(response['file']){ //if file is set, the response is no list
+                        mpd.send( ('add "' + response['file'] + '"'), function(info) {
+                            console.log("added to playlist");
+                            console.log(util.inspect(info));
+                            var message =  'added "'+response['file']+'" to playlist.';
+                            var sendto  =  sendToWho(sender, to);
+                            if(isChannel(sender, to)){
+                                message = sender + " " + message;
+                            }
+
+                            ircclient.say(sendto, message);
+                        });
+                    }
+                    console.log(util.inspect(response));
+                });
             },
     '!help' : function(sender, to){
                 var sendto  = sendToWho(sender, to);
