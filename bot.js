@@ -75,9 +75,10 @@ var mpdInit = function(){
     mpd.on('close', function(){
         mpdInit();
     });
-    // mpd.on('error', function(){
-    //     setTimeout(mpdInit, 10000);
-    // });
+    mpd.on('error', function(text){
+        console.log("mpd error:" + text);
+        //setTimeout(mpdInit, 10000);
+    });
 };
 if(disable_mpd)
     mpdInit();
