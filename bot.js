@@ -162,9 +162,10 @@ var commands = {
                         var premium  = /http.*\?[0-9a-f]*/g;
                         var filename = info['file'] ? info['file'].replace(premium, "premiumstream") : "";
                         var artist   = info['Artist'] ? info['Artist'] + " - " : "";
-                        var message  =   "now playing: " + 
-                                        artist + info['Title'] + 
-                                        '(' + filename + ')';
+                        var message  =   "now playing: " + artist + info['Title'];
+                        if(artist==""){
+                            message = message + '(' + filename + ')';
+                        }
                         if( !info['Artist'] && !info['Title']){
                             message  = "now playing: " + filename;
                         }
