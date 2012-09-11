@@ -26,7 +26,7 @@ var bckspcApi   = require('./bckspcapi.js');
 var exec = require('child_process').exec;
 var mpd;
 var topics      = {};
-var running_version = undefined;
+var running_version = "unknown";
 
 
 /*IRC SETUP*/
@@ -42,11 +42,12 @@ var ircclient   = new irc.Client( irc_server, nick, {
 });
 
 ircclient.addListener('message', function (from, to, message) {
-    if(from!=nick){
-        messageDispatcher(message, from, to);
-    }
     if(isChannel(from, to) && (from!=nick) ){
         contentFilter(message, from, to)
+    }
+
+    if(from!=nick){
+        messageDispatcher(message, from, to);
     }
 });
 ircclient.addListener('error', function(message){
@@ -77,7 +78,7 @@ var mpdInit = function(){
     });
     mpd.on('error', function(text){
         console.log("mpd error:" + text);
-        //setTimeout(mpdInit, 10000);
+        setTimeout(mpdInit, 5000);
     });
 };
 if(disable_mpd)
@@ -97,6 +98,8 @@ var messageDispatcher = function(message, sender, to){
     var command = args[0];
     var fun;
     if(fun = commands[command]){
+        if(dropMessage(message, sender, to))
+            return;
         fun.apply(undefined, [sender, to].concat(args.slice(1)) );
     }
 };
@@ -105,6 +108,23 @@ var contentFilter = function(message, sender, channel){
     for(var name in Filters){
         Filters[name](message, sender, channel);
     }
+};
+
+var bl_scores = {};
+var score_cooldown = 3000;
+var dropMessage = function(message, sender, channel){
+    var score = bl_scores[sender]||0;
+    var newscore = score+1;
+    bl_scores[sender] = newscore;
+    //console.log("incr score "+sender+ " "+ bl_scores[sender]);
+    setTimeout(function(){
+        if(bl_scores[sender]==newscore){//no incement afert this one
+            bl_scores[sender]=0;
+            //console.log("cooldown "+sender+ " "+ bl_scores[sender]);
+        }
+
+    }, newscore*score_cooldown);
+    return score>0;
 };
 
 var sendToWho = function(sender, to){
