@@ -163,7 +163,7 @@ var commands = {
                         var filename = info['file'] ? info['file'].replace(premium, "premiumstream") : "";
                         var artist   = info['Artist'] ? info['Artist'] + " - " : "";
                         var message  =   "now playing: " + artist + info['Title'];
-                        if((artist=="") || (info['Title'])){
+                        if((artist=="") || (info['Title']=="")){
                             message = message + '(' + filename + ')';
                         }
                         if( !info['Artist'] && !info['Title']){
