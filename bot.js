@@ -147,9 +147,9 @@ var ircColors = {
 
 var setTopic = function(channel, isopen){
     if(spaceApi.isOpen()){
-        message = "open";
-    }else{
         message = "closed";
+    }else{
+        message = "open";
     }
     var topicExpr=/open|closed/g;
     if(!topics[channel])
