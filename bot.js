@@ -162,6 +162,12 @@ var isChannel = function(sender, to){
     return to && to[0]=='#';
 };
 
+var reply = function(sender, to, message){
+    if(isChannel(sender, to))
+        message = sender + " " + message;
+    ircclient.say(sendToWho(sender, to), message);
+};
+
 var ircColors = {
     red : function(text){
         return irc.colors.wrap('dark_red', text);
@@ -189,22 +195,14 @@ var setTopic = function(channel, isopen){
 
 var commands = {
     '!ping' :  function(sender, to){
-                var message =  'pong';
-                var sendto  =  sendToWho(sender, to);
-                if(isChannel(sender, to)){
-                    message = sender + " " + message;
-                }
-
-                ircclient.say(sendto, message);
+                reply(sender, to, 'pong');
             },
     '!np' : function(sender, to){
-                var sendto  =  sendToWho(sender, to);
                 try{
                     mpd.send('currentsong',function(info) {
-                        
                         if(!info['_OK']){
                             l_mpd.error('np mpc not ok: ' + util.inspect(info));
-                            ircclient.say(sendto, ircColors.red("mpd error :("));
+                            reply(sender, to, ircColors.red("mpd error :("));
                             return;
                         }
                         var premium  = /http.*\?[0-9a-f]*/g;
@@ -217,62 +215,59 @@ var commands = {
                         if( !info['Artist'] && !info['Title']){
                             message  = "now playing: " + filename;
                         }
-                        ircclient.say(sendto, message);
+                        reply(sender, to, message);
                     });
                 }catch(e){ //connection lost
-                    ircclient.say(sendto, ircColors.red("mpd error :("));
+                    reply(sender, to, ircColors.red("mpd error :("));
                     l_mpd.error('np exception' + util.inspect(e));
                 }
             },
     '!status' : function(sender, to){
-                var sendto = sendToWho(sender, to);
                 var message;
                 if(spaceApi.isOpen()){
                     message = ircColors.green("open (" + spaceApi.openCount() + ")");
                 }else{
                     message = ircColors.red("closed");
                 }
-                ircclient.say(sendto, message);
+                reply(sender, to, message);
                 
             },
     '!addstream' : function(sender, to, media){
-                var sendto = sendToWho(sender, to);
                 try{
                     mpd.send( ('add ' + media), function(info) {
                         if(info._OK){
-                            ircclient.say(sendto, "added " + media + " to playlist");
+                            reply(sender, to, "added " + media + " to playlist");
                             l_mpd.info("addstream user:" + sender + " stream: " + media + " mpd: " + util.inspect(info));
                         }else{
                             l_mpd.error("addstream user:" + sender + " stream: " + media + " mpd: " + util.inspect(info));
-                            ircclient.say(sendto, ircColors.red("error adding item to playlist :("));
+                            reply(sender, to, ircColors.red("error adding item to playlist :("));
                         }
                     });
                 }catch(e){
-                    ircclient.say(sendto, ircColors.red("error adding item to playlist :("));
+                    reply(sender, to, ircColors.red("error adding item to playlist :("));
                     l_mpd.error("addstream exception: " + util.inspect(e));
                 }
             },
     '!playstream' : function(sender, to, media){
-                var sendto = sendToWho(sender, to);
                 try{
                     mpd.send( ('addid ' + media), function(info) {
                         if(info._OK){
                             mpd.send( ('playid ' + info.Id), function(info) {
                                 if(info._OK){
                                     l_mpd.info("playstream user:" + sender + " stream: " + media + " mpd: " + util.inspect(info));
-                                    ircclient.say(sendto, "playing " + media);
+                                    reply(sender, to, "playing " + media);
                                 }else{
                                     l_mpd.error("playstream s2 user:" + sender + " stream: " + media + " mpd: " + util.inspect(info));
-                                    ircclient.say(sendto, ircColors.red("error playing item to playlist :("));
+                                    reply(sender, to, ircColors.red("error playing item to playlist :("));
                                 }
                             });
                         }else{
                             l_mpd.error("playstream s1 user:" + sender + " stream: " + media + " mpd: " + util.inspect(info));
-                            ircclient.say(sendto, ircColors.red("error playing item to playlist :("));
+                            reply(sender, to, ircColors.red("error playing item to playlist :("));
                         }
                     });
                 }catch(e){
-                    ircclient.say(sendto, ircColors.red("error playing item :("));
+                    reply(sender, to, ircColors.red("error playing item :("));
                     l_mpd.error("playstream exception user:" + sender + " stream: " + media + " mpd: " + util.inspect(e));
                 }
             },
@@ -280,22 +275,21 @@ var commands = {
                 var args = Array.prototype.slice.call(arguments);
                 var term = args.slice(2).join(' ');
                 l_mpd.info("search term: " + term);
-                var sendto  =  sendToWho(sender, to);
                 try{
                     mpd.send('search any "' + term + '"', function(response){
                         if(response['file']){ //if file is set, the response is no list
                             mpd.send( ('add "' + response['file'] + '"'), function(info) {
                                 l_mpd.info("add to playlist " + util.inspect(info));
-                                ircclient.say(sendto, 'added "'+response['file']+'" to playlist.');
+                                reply(sender, to, 'added "'+response['file']+'" to playlist.');
                             });
                         }else if (response["_ordered_list"]){
-                            ircclient.say(sendto, "no unique file found, specify your search and try again.");
+                            reply(sender, to, "no unique file found, specify your search and try again.");
                         }else{
-                            ircclient.say(sendto,  ircColors.red("nothing found :("));
+                            reply(sender, to,  ircColors.red("nothing found :("));
                         }
                     });
                 }catch(e){
-                    ircclient.say(sendto, ircColors.red("error adding item :("));
+                    reply(sender, to, ircColors.red("error adding item :("));
                     l_mpd.error("add exception user:" + sender + " term: " + term + " mpd: " + util.inspect(e));
                 }
             },
@@ -304,29 +298,29 @@ var commands = {
                     mpd.send('currentsong',function(response) {
                         var sendto  = sendToWho(sender, to);
                         var message = music_baseurl + encodeURIComponent(response['file']);
-                        ircclient.say(sendto, message);
+                        reply(sender, to, message);
                     });
                 }catch(e){
-                    ircclient.say(sendto, ircColors.red("error getting file :("));
+                    reply(sender, to, ircColors.red("error getting file :("));
                     l_mpd.error("npfile exception user:" + sender + " term: " + term + " mpd: " + util.inspect(e));
                 }
             },
     '!help' : function(sender, to){
                 var sendto  = sendToWho(sender, to);
                 var message = "see https://github.com/b4ckspace/ircbot";
-                ircclient.say(sendto, message);
+                reply(sender, to, message);
             },
     '!pampus': function(sender, to){
                 var sendto = sendToWho(sender, to);
-                ircclient.say(sendto, 'Dem Pampus fehlt Salz!');
+                reply(sender, to, 'Dem Pampus fehlt Salz!');
             },
     '!nerf': function(sender, to){
                 var sendto = sendToWho(sender, to);
-                ircclient.say(sendto, 'phew! phew! nerfgunfight!');
+                reply(sender, to, 'phew! phew! nerfgunfight!');
             },
     '!version': function(sender, to){
                 var sendto = sendToWho(sender, to);
-                ircclient.say(sendto, running_version);
+                reply(sender, to, running_version);
             },
 };
 
