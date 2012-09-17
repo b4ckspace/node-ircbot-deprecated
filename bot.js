@@ -347,7 +347,7 @@ var Filters = {
                             plenkers[sender] = true;
                             setTimeout(function(){
                                 plenkers[sender] = undefined;
-                                ircclient.info("plenking cleared for user " + sender);
+                                l_plenking.info("plenking cleared for user " + sender);
                             },plenkingWait);
                         }  
                     }
