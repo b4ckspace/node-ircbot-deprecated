@@ -111,7 +111,7 @@ var contentFilter = function(message, sender, channel){
 };
 
 var bl_scores = {};
-var score_cooldown = 3000;
+var score_cooldown = 2000;
 var dropMessage = function(message, sender, channel){
     var score = bl_scores[sender]||0;
     var newscore = score+1;
