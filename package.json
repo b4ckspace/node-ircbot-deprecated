@@ -24,7 +24,8 @@
     ],
     "dependencies" : {
         "irc":       "0.3.x",
-        "mpdsocket": "0.1.x"
+        "mpdsocket": "0.1.x",
+        "nstore":    "0.5.x"
     },
     "engine": {
         "node": ">=0.6"
