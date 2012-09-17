@@ -8,6 +8,8 @@
 * !add <searchterm+>
 * !version
 * !npfile
+* !pampus
+* !nerf
 
 # Required packages
 * irc

@@ -287,6 +287,10 @@ var commands = {
                 var sendto = sendToWho(sender, to);
                 ircclient.say(sendto, 'Dem Pampus fehlt Salz!');
             },
+    '!nerf': function(sender, to){
+                var sendto = sendToWho(sender, to);
+                ircclient.say(sendto, 'phew! phew! nerfgunfight!');
+            },
     '!version': function(sender, to){
                 var sendto = sendToWho(sender, to);
                 ircclient.say(sendto, running_version);
