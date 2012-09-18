@@ -79,11 +79,9 @@ ircclient.addListener('error', function(message){
     l_irc.error(message);
 });
 ircclient.addListener('topic', function (channel, topic, nick, message){
-    var joined = !topics[channel];
     topics[channel] = topic;
-    if(joined){
-        setTopic(topics[channel], spaceApi.isOpen());
-    }
+    setTopic(channel, spaceApi.isOpen());
+    console.log("channel, topic: " + channel + " , " + topic);
 });
 
 /* SPACE API SETUP*/
@@ -182,11 +180,11 @@ var ircColors = {
     },
 };
 
-var setTopic = function(channel, isopen){
+var setTopic = function(channel){
     if(spaceApi.isOpen()){
-        message = "closed";
-    }else{
         message = "open";
+    }else{
+        message = "closed";
     }
     var topicExpr=/open|closed/g;
     if(!topics[channel])
