@@ -80,7 +80,7 @@ ircclient.addListener('error', function(message){
 });
 ircclient.addListener('topic', function (channel, topic, nick, message){
     topics[channel] = topic;
-    setTopic(channel, spaceApi.isOpen());
+    setTopic(channel);
     l_irc.debug("set channel, topic: " + channel + " , " + topic);
 });
 
@@ -181,6 +181,10 @@ var ircColors = {
 };
 
 var setTopic = function(channel){
+    if(!spaceApi.isReady()){
+        setTimeout(function(){setTopic(channel)}, 500);
+        return;
+    }
     if(spaceApi.isOpen()){
         message = "open";
     }else{
