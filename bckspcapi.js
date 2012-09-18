@@ -68,6 +68,10 @@ bckspcApi.prototype.updateSpaceStatus = function(){
     }, this.fetchTimer);
 };
 
+bckspcApi.prototype.isReady = function(){
+    return this.lastStatus != null;
+};
+
 bckspcApi.prototype.isOpen = function(){
     return this.lastStatus && this.lastStatus['members'] > 0;
 };
