@@ -22,7 +22,7 @@ var mpd_port    = '6600';
 
 
 
-
+/*REQUIRES*/
 var irc         = require('irc');
 var util        = require('util');
 var mpdSocket   = require('mpdsocket');
@@ -87,7 +87,7 @@ ircclient.addListener('topic', function (channel, topic, nick, message){
 });
 
 /* SPACE API SETUP*/
-var spaceApi    = new bckspcApi();
+var spaceApi = new bckspcApi();
 spaceApi.on('isopen', function(open){
     for(var k in channels){
         setTopic(channels[k], open);
@@ -124,7 +124,9 @@ var messageDispatcher = function(message, sender, to){
     var args    = message.split(' ');
     var command = args[0];
     var fun;
-    if(fun = commands[command]){
+    if(response = strings[command]){
+        reply(sender, to, response);
+    }else if(fun = commands[command]){
         if(dropMessage(message, sender, to))
             return;
         fun.apply(undefined, [sender, to].concat(args.slice(1)) );
@@ -180,7 +182,6 @@ var ircColors = {
     },
 };
 
-
 var setTopic = function(channel, isopen){
     if(spaceApi.isOpen()){
         message = "closed";
@@ -196,10 +197,14 @@ var setTopic = function(channel, isopen){
     }
 };
 
+var strings = {
+    '!ping' :   'pong',
+    '!help' :   'see https://github.com/b4ckspace/ircbot',
+    '!pampus':  'Dem Pampus fehlt Salz!',
+    '!nerf':    'phew! phew! nerfgunfight!',
+};
+
 var commands = {
-    '!ping' :  function(sender, to){
-                reply(sender, to, 'pong');
-            },
     '!np' : function(sender, to){
                 try{
                     mpd.send('currentsong',function(info) {
@@ -220,7 +225,7 @@ var commands = {
                         }
                         reply(sender, to, message);
                     });
-                }catch(e){ //connection lost
+                }catch(e){
                     reply(sender, to, ircColors.red("mpd error :("));
                     l_mpd.error('np exception' + util.inspect(e));
                 }
@@ -286,7 +291,7 @@ var commands = {
                                 reply(sender, to, 'added "'+response['file']+'" to playlist.');
                             });
                         }else if (response["_ordered_list"]){
-                            reply(sender, to, "no unique file found, specify your search and try again.");
+                            reply(sender, to, ircColors.red("no unique file found, specify your search and try again."));
                         }else{
                             reply(sender, to,  ircColors.red("nothing found :("));
                         }
@@ -308,23 +313,7 @@ var commands = {
                     l_mpd.error("npfile exception user:" + sender + " term: " + term + " mpd: " + util.inspect(e));
                 }
             },
-    '!help' : function(sender, to){
-                var sendto  = sendToWho(sender, to);
-                var message = "see https://github.com/b4ckspace/ircbot";
-                reply(sender, to, message);
-            },
-    '!pampus': function(sender, to){
-                var sendto = sendToWho(sender, to);
-                reply(sender, to, 'Dem Pampus fehlt Salz!');
-            },
-    '!nerf': function(sender, to){
-                var sendto = sendToWho(sender, to);
-                reply(sender, to, 'phew! phew! nerfgunfight!');
-            },
-    '!version': function(sender, to){
-                var sendto = sendToWho(sender, to);
-                reply(sender, to, running_version);
-            },
+    '!version' : function(sender, to){reply(sender, to, running_version)},
 };
 
 var plenkers={};
