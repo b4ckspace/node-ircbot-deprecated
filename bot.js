@@ -313,6 +313,15 @@ var commands = {
                     l_mpd.error("npfile exception user:" + sender + " term: " + term + " mpd: " + util.inspect(e));
                 }
             },
+    '!update'  : function(sender, to){
+                var cmd = 'git pull origin master';
+                exec(cmd, function (e, stdout, stderr) {
+                    l_other.info('exec cmd: ' + cmd + " stdout: " + stdout);
+                    if (e !== null) {
+                        l_other.error('exec cmd: ' + cmd + ' error: ' + error + "stderr: " + stderr);
+                    }
+                });
+            },
     '!version' : function(sender, to){reply(sender, to, running_version)},
 };
 
