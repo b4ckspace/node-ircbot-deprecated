@@ -1,4 +1,5 @@
 var env=process.env;
+
 /* IRC SETTNGS */
 var nick        = env['nick']       || 'b4ckspace_bot';
 var realname    = env['realname']   || 'b4ckspace_bot';
@@ -10,13 +11,16 @@ var secure      = env['irc_ssl']    == "true";
 var ignoreSsl   = env['ssl_ignore'] == "true";
 var channels    = (env['channels']  && env['channels'].split(','))||['#backspace'];
 var disable_mpd = env['nompd']      != "true";
-var music_baseurl = "ftp://nfs/music/";
+
+var music_baseurl   = "ftp://nfs/music/";
+var plenkingWait    = 30*60*1000;//30min
+var score_cooldown  = 2000;
 
 /*MPD SETTINGS*/
 var mpd_host    = '10.1.20.5';
 var mpd_port    = '6600';
 
-var plenkingWait = 30*60*1000;//30min
+
 
 
 var irc         = require('irc');
@@ -134,7 +138,6 @@ var contentFilter = function(message, sender, channel){
 };
 
 var bl_scores = {};
-var score_cooldown = 2000;
 var dropMessage = function(message, sender, channel){
     var score = bl_scores[sender]||0;
     var newscore = score+1;
