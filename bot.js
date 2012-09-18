@@ -81,7 +81,7 @@ ircclient.addListener('error', function(message){
 ircclient.addListener('topic', function (channel, topic, nick, message){
     topics[channel] = topic;
     setTopic(channel, spaceApi.isOpen());
-    console.log("channel, topic: " + channel + " , " + topic);
+    l_irc.debug("set channel, topic: " + channel + " , " + topic);
 });
 
 /* SPACE API SETUP*/
