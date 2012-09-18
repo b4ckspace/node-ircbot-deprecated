@@ -112,7 +112,7 @@ if(disable_mpd)
     mpdInit();
 
 /*code*/
-exec('git describe  --always --dirty', function (e, stdout, stderr) {
+exec('git log -n 1 HEAD --format=oneline', function (e, stdout, stderr) {
     if (e !== null) {
         l_other.error('exec error: ' + error + "stderr: " + stderr);
     }else{
