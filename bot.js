@@ -88,7 +88,7 @@ ircclient.addListener('topic', function (channel, topic, nick, message){
 var spaceApi = new bckspcApi();
 spaceApi.on('isopen', function(open){
     for(var k in channels){
-        setTopic(channels[k], open);
+        setTopic(k);
     }
 });
 
@@ -112,7 +112,8 @@ if(disable_mpd)
 /*code*/
 exec('git log -n 1 HEAD --format=oneline', function (e, stdout, stderr) {
     if (e !== null) {
-        l_other.error('exec error: ' + error + "stderr: " + stderr);
+        running_version = 'error getting git version';
+        l_other.error('exec error: ' + e + "stderr: " + stderr);
     }else{
         running_version=stdout;
     }
@@ -339,8 +340,7 @@ var Filters = {
                             l_plenking.warn("kicking user: " + sender + " from channel " + to);
                             ircclient.send("kick", to, sender, "plenking");
                         }else{
-                            var message = sender + " bitte hier kein plenking.";
-                            ircclient.say(to, message);
+                            reply(sender, to, "bitte hier kein plenking.");
                             plenkers[sender] = true;
                             setTimeout(function(){
                                 plenkers[sender] = undefined;
