@@ -10,7 +10,7 @@
 * !npfile
 * !pampus
 * !nerf
-
+* !karma [username]
 # Required packages
 * irc
 * mpdsocket
