@@ -14,6 +14,7 @@ var disable_mpd = env['nompd']      != "true";
 
 var music_baseurl   = "ftp://nfs/music/";
 var plenkingWait    = 30*60*1000;//30min
+var karmaWait       = 60*1000;
 var score_cooldown  = 2000;
 
 /*MPD SETTINGS*/
@@ -52,6 +53,7 @@ var l_karma = log4js.getLogger("karma");
 var l_blacklist = log4js.getLogger("blacklist");
 var l_plenking = log4js.getLogger("plenking");
 var l_other = log4js.getLogger("other");
+l_other.info("STARTUP");
 
 
 /*IRC SETUP*/
@@ -325,11 +327,21 @@ var commands = {
                     }
                 });
             },
+    '!karma'   : function(sender, to, user){
+                var who = user?user:sender;
+                getKarma(who, function(karma){
+                    if(user){
+                        reply(sender, to, "karma for " + who + " : " + karma);
+                    }else{
+                        reply(sender, to, "your karma is " + karma);
+                    }
+                });
+            },
     '!version' : function(sender, to){reply(sender, to, running_version)},
 };
 
 var plenkers={};
-
+var karma_timeouts={};
 var Filters = {
     plenking :  function(message, sender, to){
                     var expr = /\s{2,}/g ;
@@ -349,4 +361,75 @@ var Filters = {
                         }  
                     }
                 },
+    karma : function(message, sender, to){
+        //console.log("karma");
+        if(karma_timeouts[sender]){
+            l_karma.info('karma while timeout');
+            reply(sender, to, 'du kannst nur einmal pro minute karma verteilen.');
+            return;
+        }
+        if(!isChannel(sender, to)){
+            reply(sender, to, 'you can only give karma in channels.')
+            l_karma.debug('no channel msg: %s sender: %s to: %s', message, sender, to);
+            return;
+        }
+        var karma_regex = /^(\w+)[\s,:]*\+[\+1]/;
+        var karmas = message.match(karma_regex);
+        //console.log(karmas);
+        if(!karmas){
+            //l_karma.debug('no karmas found msg: %s sender: %s to: %s', message, sender, to);
+            return;
+        }
+        var nick = karmas[1];
+        if(nick==sender){
+            reply(sender, to, 'you can only give karma to others ;)');
+            l_karma.info('self-karma %s', nick);
+            return;
+        }
+        //console.log(karmas);
+        
+        //console.log("names " + to);
+        ircclient.once('names', function(channel, names){
+            if(channel != to){
+                l_karma.warn('channel(%s) != to(%s)', channel, to);
+                return;
+            }
+            if(names[nick]!=undefined){
+                addKarma(nick);
+                l_karma.info('%s gave %s karma (%s)', sender, nick, channel);
+                karma_timeouts[sender]=true;
+                setTimeout(function(){
+                    karma_timeouts[sender]=undefined;
+                    l_karma.info('karma timeout for user %s cleared', sender);
+                },karmaWait);
+            }else{
+                l_karma.warn('%s tried to give karma to %s (%s). but user is not in channel', sender, nick, channel);
+            }
+        });
+        ircclient.send('names', to);
+    },
 };
+
+var addKarma = function(user){
+    getKarma(user, function(count){
+        karma.save(user, {karma: count+1}, function (err) {
+            if (err) {
+                l_karma.error("karma save error: " + util.inspect(err));
+                return;
+            }
+            l_karma.info("saved %s karma for %s", count+1, user);
+        });
+    });
+};
+
+var getKarma = function(user, callback){
+    karma.get(user, function (err, doc, key) {
+        if (err) {
+            //console.log(err);
+            callback(0);
+            return;
+        }
+        //console.log(doc);
+        callback(doc.karma);
+    });
+}; 
