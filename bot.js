@@ -363,17 +363,6 @@ var Filters = {
                     }
                 },
     karma : function(message, sender, to){
-        //console.log("karma");
-        if(karma_timeouts[sender]){
-            l_karma.info('karma while timeout');
-            reply(sender, to, 'du kannst nur einmal pro minute karma verteilen.');
-            return;
-        }
-        if(!isChannel(sender, to)){
-            reply(sender, to, 'you can only give karma in channels.')
-            l_karma.debug('no channel msg: %s sender: %s to: %s', message, sender, to);
-            return;
-        }
         var karma_regex = /^(\w+)[\s,:]*\+[\+1]/;
         var karmas = message.match(karma_regex);
         //console.log(karmas);
@@ -385,6 +374,17 @@ var Filters = {
         if(nick==sender){
             reply(sender, to, 'you can only give karma to others ;)');
             l_karma.info('self-karma %s', nick);
+            return;
+        }
+        //console.log("karma");
+        if(karma_timeouts[sender]){
+            l_karma.info('karma while timeout');
+            reply(sender, to, 'du kannst nur einmal pro minute karma verteilen.');
+            return;
+        }
+        if(!isChannel(sender, to)){
+            reply(sender, to, 'you can only give karma in channels.')
+            l_karma.debug('no channel msg: %s sender: %s to: %s', message, sender, to);
             return;
         }
         //console.log(karmas);
