@@ -320,6 +320,7 @@ var commands = {
             },
     '!update'  : function(sender, to){
                 var cmd = 'git pull origin master';
+                l_other.info("update requested by %s in %s", sender, isChannel(sender,to)?to:'query' );
                 exec(cmd, function (e, stdout, stderr) {
                     l_other.info('exec cmd: ' + cmd + " stdout: " + stdout);
                     if (e !== null) {
