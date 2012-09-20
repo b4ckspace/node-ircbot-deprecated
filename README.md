@@ -11,6 +11,8 @@
 * !pampus
 * !nerf
 * !karma [username]
+* !commands
+* !more
 # Required packages
 * irc
 * mpdsocket
