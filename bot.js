@@ -209,140 +209,149 @@ var strings = {
     '!nerf':    'phew! phew! nerfgunfight!',
 };
 
-var commands = {
-    '!np' : function(sender, to){
-                try{
-                    mpd.send('currentsong',function(info) {
-                        if(!info['_OK']){
-                            l_mpd.error('np mpc not ok: ' + util.inspect(info));
-                            reply(sender, to, ircColors.red("mpd error :("));
-                            return;
-                        }
-                        var premium  = /http.*\?[0-9a-f]*/g;
-                        var filename = info['file'] ? info['file'].replace(premium, "premiumstream") : "";
-                        var artist   = info['Artist'] ? info['Artist'] + " - " : "";
-                        var message  =   "now playing: " + artist + info['Title'];
-                        if((artist=="") || (info['Title']=="")){
-                            message = message + '(' + filename + ')';
-                        }
-                        if( !info['Artist'] && !info['Title']){
-                            message  = "now playing: " + filename;
-                        }
-                        reply(sender, to, message);
-                    });
-                }catch(e){
-                    reply(sender, to, ircColors.red("mpd error :("));
-                    l_mpd.error('np exception' + util.inspect(e));
-                }
-            },
-    '!status' : function(sender, to){
-                var message;
-                if(spaceApi.isOpen()){
-                    message = ircColors.green("open (" + spaceApi.openCount() + ")");
-                }else{
-                    message = ircColors.red("closed");
-                }
-                reply(sender, to, message);
-                
-            },
-    '!addstream' : function(sender, to, media){
-                try{
-                    mpd.send( ('add ' + media), function(info) {
-                        if(info._OK){
-                            reply(sender, to, "added " + media + " to playlist");
-                            l_mpd.info("addstream user:" + sender + " stream: " + media + " mpd: " + util.inspect(info));
-                        }else{
-                            l_mpd.error("addstream user:" + sender + " stream: " + media + " mpd: " + util.inspect(info));
-                            reply(sender, to, ircColors.red("error adding item to playlist :("));
-                        }
-                    });
-                }catch(e){
-                    reply(sender, to, ircColors.red("error adding item to playlist :("));
-                    l_mpd.error("addstream exception: " + util.inspect(e));
-                }
-            },
-    '!playstream' : function(sender, to, media){
-                try{
-                    mpd.send( ('addid ' + media), function(info) {
-                        if(info._OK){
-                            mpd.send( ('playid ' + info.Id), function(info) {
-                                if(info._OK){
-                                    l_mpd.info("playstream user:" + sender + " stream: " + media + " mpd: " + util.inspect(info));
-                                    reply(sender, to, "playing " + media);
-                                }else{
-                                    l_mpd.error("playstream s2 user:" + sender + " stream: " + media + " mpd: " + util.inspect(info));
-                                    reply(sender, to, ircColors.red("error playing item to playlist :("));
-                                }
-                            });
-                        }else{
-                            l_mpd.error("playstream s1 user:" + sender + " stream: " + media + " mpd: " + util.inspect(info));
-                            reply(sender, to, ircColors.red("error playing item to playlist :("));
-                        }
-                    });
-                }catch(e){
-                    reply(sender, to, ircColors.red("error playing item :("));
-                    l_mpd.error("playstream exception user:" + sender + " stream: " + media + " mpd: " + util.inspect(e));
-                }
-            },
-    '!add' : function(sender, to){
-                var args = Array.prototype.slice.call(arguments);
-                var term = args.slice(2).join(' ');
-                l_mpd.info("search term: " + term);
-                try{
-                    mpd.send('search any "' + term + '"', function(response){
-                        if(response['file']){ //if file is set, the response is no list
-                            mpd.send( ('add "' + response['file'] + '"'), function(info) {
-                                l_mpd.info("add to playlist " + util.inspect(info));
-                                reply(sender, to, 'added "'+response['file']+'" to playlist.');
-                            });
-                        }else if (response["_ordered_list"]){
-                            reply(sender, to, ircColors.red("no unique file found, specify your search and try again."));
-                        }else{
-                            reply(sender, to,  ircColors.red("nothing found :("));
-                        }
-                    });
-                }catch(e){
-                    reply(sender, to, ircColors.red("error adding item :("));
-                    l_mpd.error("add exception user:" + sender + " term: " + term + " mpd: " + util.inspect(e));
-                }
-            },
-    '!npfile' : function(sender, to){
-                try{
-                    mpd.send('currentsong',function(response) {
-                        var sendto  = sendToWho(sender, to);
-                        var message = music_baseurl + encodeURIComponent(response['file']);
-                        reply(sender, to, message);
-                    });
-                }catch(e){
-                    reply(sender, to, ircColors.red("error getting file :("));
-                    l_mpd.error("npfile exception user:" + sender + " term: " + term + " mpd: " + util.inspect(e));
-                }
-            },
-    '!update'  : function(sender, to){
-                var cmd = 'git pull origin master';
-                l_other.info("update requested by %s in %s", sender, isChannel(sender,to)?to:'query' );
-                exec(cmd, function (e, stdout, stderr) {
-                    l_other.info('exec cmd: ' + cmd + " stdout: " + stdout);
-                    if (e !== null) {
-                        l_other.error('exec cmd: ' + cmd + ' error: ' + error + "stderr: " + stderr);
-                    }
-                });
-            },
-    '!karma'   : function(sender, to, user){
-                var who = user?user:sender;
-                getKarma(who, function(karma){
-                    if(user){
-                        reply(sender, to, who + " hat " + karma + " karma");
+var commands = {};
+
+(commands['!status'] = function(sender, to){
+    var message;
+    if(spaceApi.isOpen()){
+        message = ircColors.green("open (" + spaceApi.openCount() + ")");
+    }else{
+        message = ircColors.red("closed");
+    }
+    reply(sender, to, message);
+    
+}).helptext = "get the space status";
+
+(commands['!np'] = function(sender, to){
+    try{
+        mpd.send('currentsong',function(info) {
+            if(!info['_OK']){
+                l_mpd.error('np mpc not ok: ' + util.inspect(info));
+                reply(sender, to, ircColors.red("mpd error :("));
+                return;
+            }
+            var premium  = /http.*\?[0-9a-f]*/g;
+            var filename = info['file'] ? info['file'].replace(premium, "premiumstream") : "";
+            var artist   = info['Artist'] ? info['Artist'] + " - " : "";
+            var message  =   "now playing: " + artist + info['Title'];
+            if((artist=="") || (info['Title']=="")){
+                message = message + '(' + filename + ')';
+            }
+            if( !info['Artist'] && !info['Title']){
+                message  = "now playing: " + filename;
+            }
+            reply(sender, to, message);
+        });
+    }catch(e){
+        reply(sender, to, ircColors.red("mpd error :("));
+        l_mpd.error('np exception' + util.inspect(e));
+    }
+}).helptext = "now playing.";
+
+(commands['!addstream'] = function(sender, to, media){
+    try{
+        mpd.send( ('add ' + media), function(info) {
+            if(info._OK){
+                reply(sender, to, "added " + media + " to playlist");
+                l_mpd.info("addstream user:" + sender + " stream: " + media + " mpd: " + util.inspect(info));
+            }else{
+                l_mpd.error("addstream user:" + sender + " stream: " + media + " mpd: " + util.inspect(info));
+                reply(sender, to, ircColors.red("error adding item to playlist :("));
+            }
+        });
+    }catch(e){
+        reply(sender, to, ircColors.red("error adding item to playlist :("));
+        l_mpd.error("addstream exception: " + util.inspect(e));
+    }
+}).helptext = "adds the stream to the mpd playlist.";
+
+(commands['!playstream'] = function(sender, to, media){
+    try{
+        mpd.send( ('addid ' + media), function(info) {
+            if(info._OK){
+                mpd.send( ('playid ' + info.Id), function(info) {
+                    if(info._OK){
+                        l_mpd.info("playstream user:" + sender + " stream: " + media + " mpd: " + util.inspect(info));
+                        reply(sender, to, "playing " + media);
                     }else{
-                        reply(sender, to, "du hast " + karma + " karma");
+                        l_mpd.error("playstream s2 user:" + sender + " stream: " + media + " mpd: " + util.inspect(info));
+                        reply(sender, to, ircColors.red("error playing item:("));
                     }
                 });
-            },
-    '!version' : function(sender, to){reply(sender, to, running_version)},
+            }else{
+                l_mpd.error("playstream s1 user:" + sender + " stream: " + media + " mpd: " + util.inspect(info));
+                reply(sender, to, ircColors.red("error playing item:("));
+            }
+        });
+    }catch(e){
+        reply(sender, to, ircColors.red("error playing item :("));
+        l_mpd.error("playstream exception user:" + sender + " stream: " + media + " mpd: " + util.inspect(e));
+    }
+}).helptext = "play the given stream.";
 
-};
+(commands['!add'] = function(sender, to){
+    var args = Array.prototype.slice.call(arguments);
+    var term = args.slice(2).join(' ');
+    l_mpd.info("search term: " + term);
+    try{
+        mpd.send('search any "' + term + '"', function(response){
+            if(response['file']){ //if file is set, the response is no list
+                mpd.send( ('add "' + response['file'] + '"'), function(info) {
+                    l_mpd.info("add to playlist " + util.inspect(info));
+                    reply(sender, to, 'added "'+response['file']+'" to playlist.');
+                });
+            }else if (response["_ordered_list"]){
+                reply(sender, to, ircColors.red("no unique file found, specify your search and try again."));
+            }else{
+                reply(sender, to,  ircColors.red("nothing found :("));
+            }
+        });
+    }catch(e){
+        reply(sender, to, ircColors.red("error adding item :("));
+        l_mpd.error("add exception user:" + sender + " term: " + term + " mpd: " + util.inspect(e));
+    }
+}).helptext = "add the song matching the searchterm to the playlist.";
 
-(commands['!commands']=function(sender, to){
+(commands['!npfile'] = function(sender, to){
+    try{
+        mpd.send('currentsong',function(response) {
+            var sendto  = sendToWho(sender, to);
+            var message = music_baseurl + encodeURIComponent(response['file']);
+            reply(sender, to, message);
+        });
+    }catch(e){
+        reply(sender, to, ircColors.red("error getting file :("));
+        l_mpd.error("npfile exception user:" + sender + " term: " + term + " mpd: " + util.inspect(e));
+    }
+}).helptext = "get the path to the current playing file";
+
+(commands['!update'] = function(sender, to){
+    var cmd = 'git pull origin master';
+    l_other.info("update requested by %s in %s", sender, isChannel(sender,to)?to:'query' );
+    exec(cmd, function (e, stdout, stderr) {
+        l_other.info('exec cmd: ' + cmd + " stdout: " + stdout);
+        if (e !== null) {
+            l_other.error('exec cmd: ' + cmd + ' error: ' + error + "stderr: " + stderr);
+        }
+    });
+}).helptext = "update bot to latest git version.";
+
+(commands['!karma'] = function(sender, to, user){
+    var who = user?user:sender;
+    getKarma(who, function(karma){
+        if(user){
+            reply(sender, to, who + " hat " + karma + " karma");
+        }else{
+            reply(sender, to, "du hast " + karma + " karma");
+        }
+    });
+}).helptext = "get own karma or of the given user";
+
+(commands['!version'] = function(sender, to){
+    reply(sender, to, running_version)
+}).helptext = "print version number";
+
+(commands['!commands'] = function(sender, to){
     var commandlist = "";
     for(str in strings){
         commandlist += str + ", ";
@@ -351,9 +360,9 @@ var commands = {
         commandlist += cmd + ", ";
     }
     reply(sender, to, commandlist);
-}).helptext="get a list of all commands";
+}).helptext = "get a list of all commands";
 
-(commands['!more']=function(sender, to, command){
+(commands['!more'] = function(sender, to, command){
     if(!command){
         reply(sender, to, "for general help, use !help or !commands");
         return;
@@ -369,7 +378,7 @@ var commands = {
         reply(sender, to, "no helptext found");
         return;
     }
-}).helptext="get more help for a command";
+}).helptext = "get more help for a command";
 
 var plenkers={};
 var karma_timeouts={};
