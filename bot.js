@@ -332,9 +332,9 @@ var commands = {
                 var who = user?user:sender;
                 getKarma(who, function(karma){
                     if(user){
-                        reply(sender, to, "karma for " + who + " : " + karma);
+                        reply(sender, to, who + " hat " + karma + " karma");
                     }else{
-                        reply(sender, to, "your karma is " + karma);
+                        reply(sender, to, "du hast " + karma + " karma");
                     }
                 });
             },
@@ -372,7 +372,7 @@ var Filters = {
         }
         var nick = karmas[1];
         if(nick==sender){
-            reply(sender, to, 'you can only give karma to others ;)');
+            reply(sender, to, 'eigenlob stinkt :P');
             l_karma.info('self-karma %s', nick);
             return;
         }
