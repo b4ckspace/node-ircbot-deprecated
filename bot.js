@@ -339,7 +339,37 @@ var commands = {
                 });
             },
     '!version' : function(sender, to){reply(sender, to, running_version)},
+
 };
+
+(commands['!commands']=function(sender, to){
+    var commandlist = "";
+    for(str in strings){
+        commandlist += str + ", ";
+    }
+    for(cmd in commands){
+        commandlist += cmd + ", ";
+    }
+    reply(sender, to, commandlist);
+}).helptext="get a list of all commands";
+
+(commands['!more']=function(sender, to, command){
+    if(!command){
+        reply(sender, to, "for general help, use !help or !commands");
+        return;
+    }
+    if(!commands[command]){
+        reply(sender, to, "command not found");
+        return;
+    }
+    var text;
+    if(text = commands[command].helptext){
+        reply(sender, to, command + " : " + text);
+    }else{
+        reply(sender, to, "no helptext found");
+        return;
+    }
+}).helptext="get more help for a command";
 
 var plenkers={};
 var karma_timeouts={};
