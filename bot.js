@@ -364,7 +364,7 @@ var commands = {
     }
     var text;
     if(text = commands[command].helptext){
-        reply(sender, to, command + " : " + text);
+        reply(sender, to, command + ": " + text);
     }else{
         reply(sender, to, "no helptext found");
         return;
