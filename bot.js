@@ -30,6 +30,7 @@ var mpdSocket   = require('mpdsocket');
 var nStore      = require('nstore');
 var log4js      = require('log4js');
 var bckspcApi   = require('./bckspcapi.js');
+var webrelais   = require('./webrelais.js');
 var exec        = require('child_process').exec;
 var mpd;
 var topics      = {};
@@ -337,6 +338,20 @@ var commands = {
                         reply(sender, to, "your karma is " + karma);
                     }
                 });
+            },
+    '!alarm'  : function() {
+                webrelais.activate(3);
+                setTimeout(function(){
+                    webrelais.deactivate(3);
+                    webrelais.activate(4);
+                    setTimeout(function(){
+                        webrelais.deactivate(4);
+                        webrelais.activate(3);
+                        setTimeout(function(){
+                            webrelais.deactivate(3);
+                        }, 1000);
+                    }, 1000);
+                }, 1000);
             },
     '!version' : function(sender, to){reply(sender, to, running_version)},
 };
