@@ -11,6 +11,7 @@
 * !pampus
 * !nerf
 * !karma [username]
+* !alarm
 # Required packages
 * irc
 * mpdsocket
