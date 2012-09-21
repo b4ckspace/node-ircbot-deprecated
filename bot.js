@@ -1,16 +1,14 @@
 var env=process.env;
 
 /* IRC SETTNGS */
-var nick        = env['nick']       || 'b4ckspace_bot';
-var realname    = env['realname']   || 'b4ckspace_bot';
-var username    = env['username']   || 'b4ckspace_bot';
-var irc_server  = env['irc_server'] || 'irc.freenode.net';
-var irc_port    = env['irc_port']   || 6667;
-var ircpass     = env['irc_pass']   || undefined;
-var secure      = env['irc_ssl']    == "true";
-var ignoreSsl   = env['ssl_ignore'] == "true";
-var channels    = (env['channels']  && env['channels'].split(','))||['#backspace'];
-var disable_mpd = env['nompd']      != "true";
+/* settings will be set/overwritten in the following order:
+ * 1. config.js
+ * 2. environment variables
+ * 3. config.local.js
+ */
+require('./config.js');
+var localConfig = require('./config.local.js');
+
 
 var music_baseurl   = "ftp://nfs/music/";
 var plenkingWait    = 30*60*1000;//30min
