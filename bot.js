@@ -110,10 +110,10 @@ spaceApi.on('isopen', function(open){
 
 /* MPD SETUP*/
 var mpdInit = function(){
-    l_mpd.info("reconnect");
+    l_mpd.debug("reconnect");
     mpd = new mpdSocket(mpd_host, mpd_port);
     mpd.on('close', function(){
-        l_mpd.warn("close");
+        l_mpd.debug("close");
         mpdInit();
     });
     mpd.on('error', function(text){
