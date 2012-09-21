@@ -5,11 +5,9 @@
  * 3. config.local.js
  */
 var config;
-try
-{
+try{
 	config = require('./config.local.js');
-} catch(e)
-{
+}catch(e){
 	config = require('./config.js');
 }
 var nick = config.nick;
@@ -121,7 +119,7 @@ var mpdInit = function(){
     });
 };
 
-if(disable_mpd)
+if(!disable_mpd)
     mpdInit();
 
 /*code*/

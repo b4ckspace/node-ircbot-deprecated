@@ -11,4 +11,4 @@ exports.ircpass     = env['irc_pass']   || undefined;
 exports.secure      = env['irc_ssl']    == "true";
 exports.ignoreSsl   = env['ssl_ignore'] == "true";
 exports.channels    = (env['channels']  && env['channels'].split(','))||['#backspace'];
-exports.disable_mpd = env['nompd']      != "true";
+exports.disable_mpd = env['nompd']      == "true";
