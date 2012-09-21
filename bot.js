@@ -1,16 +1,29 @@
-var env=process.env;
-
 /* IRC SETTNGS */
-var nick        = env['nick']       || 'b4ckspace_bot';
-var realname    = env['realname']   || 'b4ckspace_bot';
-var username    = env['username']   || 'b4ckspace_bot';
-var irc_server  = env['irc_server'] || 'irc.freenode.net';
-var irc_port    = env['irc_port']   || 6667;
-var ircpass     = env['irc_pass']   || undefined;
-var secure      = env['irc_ssl']    == "true";
-var ignoreSsl   = env['ssl_ignore'] == "true";
-var channels    = (env['channels']  && env['channels'].split(','))||['#backspace'];
-var disable_mpd = env['nompd']      != "true";
+/* settings will be set/overwritten in the following order:
+ * 1. config.js
+ * 2. environment variables
+ * 3. config.local.js
+ */
+var config;
+try
+{
+	config = require('./config.local.js');
+} catch(e)
+{
+	config = require('./config.js');
+}
+var nick = config.nick;
+var realname = config.realname;
+var username = config.username;
+var irc_server = config.irc_server;
+var irc_port = config.irc_port;
+var ircpass = config.ircpass;
+var secure = config.secure;
+var ignoreSsl = config.ignoreSsl;
+var channels = config.channels;
+var disable_mpd = config.disable_mpd;
+
+
 
 var music_baseurl   = "ftp://nfs/music/";
 var plenkingWait    = 30*60*1000;//30min
@@ -393,7 +406,7 @@ var Filters = {
                     }
                 },
     karma : function(message, sender, to){
-        var karma_regex = /^(\w+)[\s,:]*\+[\+1]/;
+        var karma_regex = /^([\w_\-\\\[\]\{\}\^`\|]+)[\s,:]*\+[\+1]/;
         var karmas = message.match(karma_regex);
         //console.log(karmas);
         if(!karmas){
