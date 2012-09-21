@@ -11,8 +11,10 @@
 * !pampus
 * !nerf
 * !karma [username]
+* !alarm
 * !commands
 * !more
+
 
 # Required packages
 * irc
