@@ -1,13 +1,28 @@
-var env=process.env;
-
 /* IRC SETTNGS */
 /* settings will be set/overwritten in the following order:
  * 1. config.js
  * 2. environment variables
  * 3. config.local.js
  */
-require('./config.js');
-var localConfig = require('./config.local.js');
+var config;
+try
+{
+	config = require('./config.local.js');
+} catch(e)
+{
+	config = require('./config.js');
+}
+var nick = config.nick;
+var realname = config.realname;
+var username = config.username;
+var irc_server = config.irc_server;
+var irc_port = config.irc_port;
+var ircpass = config.ircpass;
+var secure = config.secure;
+var ignoreSsl = config.ignoreSsl;
+var channels = config.channels;
+var disable_mpd = config.disable_mpd;
+
 
 
 var music_baseurl   = "ftp://nfs/music/";
