@@ -30,12 +30,12 @@ var mpdSocket   = require('mpdsocket');
 var nStore      = require('nstore');
 var log4js      = require('log4js');
 var bckspcApi   = require('./bckspcapi.js');
-var webrelais   = require('./webrelais.js');
+var webrelaisApi= require('./webrelais.js');
 var exec        = require('child_process').exec;
 var mpd;
 var topics      = {};
 var running_version = "unknown";
-
+var webrelais = new webrelaisApi.Client("https://webrelais.bckspc.de:443");
 
 /*DB SETUP*/
 var karma = nStore.new('data/karma.db', function () {});
@@ -340,18 +340,26 @@ var commands = {
                 });
             },
     '!alarm'  : function() {
-                webrelais.activate(3);
-                setTimeout(function(){
-                    webrelais.deactivate(3);
-                    webrelais.activate(4);
+                var white = 3;
+                var red   = 4;
+                var on    = 1;
+                var off   = 0;
+                var waittime = 500;
+                webrelais.set_port(white, on, function(){
                     setTimeout(function(){
-                        webrelais.deactivate(4);
-                        webrelais.activate(3);
-                        setTimeout(function(){
-                            webrelais.deactivate(3);
-                        }, 1000);
-                    }, 1000);
-                }, 1000);
+                        webrelais.set_port(white, off, function(){});
+                        webrelais.set_port(red, on, function(){
+                            setTimeout(function(){
+                                webrelais.set_port(red, off, function(){});
+                                webrelais.set_port(white, on, function(){
+                                    setTimeout(function(){
+                                        webrelais.set_port(white, off, function(){});
+                                    }, waittime);
+                                });
+                            }, waittime);
+                        });
+                    }, waittime);
+                });
             },
     '!version' : function(sender, to){reply(sender, to, running_version)},
 };
