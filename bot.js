@@ -391,7 +391,7 @@ var Filters = {
                     }
                 },
     karma : function(message, sender, to){
-        var karma_regex = /^(\w+)[\s,:]*\+[\+1]/;
+        var karma_regex = /^([\w_\-\\\[\]\\{\}\^`\|]+)[\s,:]*\+[\+1]/;
         var karmas = message.match(karma_regex);
         //console.log(karmas);
         if(!karmas){
