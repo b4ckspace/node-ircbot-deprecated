@@ -377,7 +377,7 @@ var alarm_blocked = false;
         return;
     }
     if(alarm_blocked){
-        reply(sender, to, "alarm not ready.");
+        reply(sender, to, "https://www.youtube.com/watch?v=TqDsMEOYA9g");
         l_webrelais.info("alarm not ready %s %s", sender, to);
         return;
     }
