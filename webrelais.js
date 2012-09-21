@@ -46,6 +46,7 @@ Client.prototype.send_command = function( path, type, callback ) {
         res.on('end', function () {
             console.log("Emit event");
             client.emit('command_sent');
+            callback();
         });
     });
 
