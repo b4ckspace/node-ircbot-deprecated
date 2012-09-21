@@ -368,7 +368,11 @@ if(!disable_mpd){
 }).helptext = "print version number";
 
 var alarm_blocked = false;
-(commands['!alarm'] = function() {
+(commands['!alarm'] = function(sender, to) {
+    if(!isChannel(sender, to)){
+        reply(sender, to, "you can use !alarm only in channels.");
+        return;
+    }
     if(alarm_blocked){
         reply(sender, to, "alarm not ready.");
         return;
