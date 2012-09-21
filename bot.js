@@ -143,8 +143,14 @@ var messageDispatcher = function(message, sender, to){
     if(response = strings[command]){
         reply(sender, to, response);
     }else if(fun = commands[command]){
-        if(dropMessage(message, sender, to))
+        if(dropMessage(message, sender, to)){
+            if (getBlCount(sender) == 5){
+                reply(sender, to, "Wat R U Doin");
+                reply(sender, to, "Stahp!");
+            }
             return;
+        }
+            
         fun.apply(undefined, [sender, to].concat(args.slice(1)) );
     }
 };
@@ -173,6 +179,9 @@ var dropMessage = function(message, sender, channel){
     if(score>0)
         l_blacklist.warn("dropped user " + sender);
     return score>0;
+};
+var getBlCount = function(sender){
+    return bl_scores[sender];
 };
 
 var sendToWho = function(sender, to){
