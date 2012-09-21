@@ -129,9 +129,10 @@ if(!disable_mpd)
 exec('git log -n 1 HEAD --format=oneline', function (e, stdout, stderr) {
     if (e !== null) {
         running_version = 'error getting git version';
-        l_other.error('exec error: ' + e + "stderr: " + stderr);
+        l_other.error('exec error: ' + e + "stderr: " + JSON.stringify(stderr));
     }else{
         running_version=stdout;
+        l_other.info("version: ", running_version);
     }
 });
 
@@ -346,9 +347,9 @@ if(!disable_mpd){
     var cmd = 'git pull origin master';
     l_other.info("update requested by %s in %s", sender, isChannel(sender,to)?to:'query' );
     exec(cmd, function (e, stdout, stderr) {
-        l_other.info('exec cmd: ' + cmd + " stdout: " + stdout);
+        l_other.info('exec cmd: ' + cmd + " stdout: " + JSON.stringify(stdout));
         if (e !== null) {
-            l_other.error('exec cmd: ' + cmd + ' error: ' + error + "stderr: " + stderr);
+            l_other.error('exec cmd: ' + cmd + ' error: ' + error + "stderr: " + JSON.stringify(stderr));
         }
     });
 }).helptext = "update bot to latest git version.";
