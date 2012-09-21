@@ -65,6 +65,7 @@ var l_irc   = log4js.getLogger("irc");
 var l_karma = log4js.getLogger("karma");
 var l_blacklist = log4js.getLogger("blacklist");
 var l_plenking = log4js.getLogger("plenking");
+var l_webrelais = log4js.getLogger("webrelais");
 var l_other = log4js.getLogger("other");
 l_other.info("STARTUP");
 
@@ -371,21 +372,25 @@ var alarm_blocked = false;
 (commands['!alarm'] = function(sender, to) {
     if(!isChannel(sender, to)){
         reply(sender, to, "you can use !alarm only in channels.");
+        l_webrelais.info("alarm not in channel %s", sender);
         return;
     }
     if(alarm_blocked){
         reply(sender, to, "alarm not ready.");
+        l_webrelais.info("alarm not ready %s %s", sender, to);
         return;
     }
     alarm_blocked=true;
     setTimeout(function(){
         alarm_blocked = false;
+        l_webrelais.debug("alarm cooldown");
     }, alarmWait);
     var white = 3;
     var red   = 4;
     var on    = 1;
     var off   = 0;
     var waittime = 500;
+    l_webrelais.info("alarm in channel %s by user %s", sender, to);
     webrelais.set_port(white, on, function(){
         setTimeout(function(){
             webrelais.set_port(white, off, function(){});
