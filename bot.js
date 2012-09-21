@@ -26,6 +26,7 @@ var disable_mpd = config.disable_mpd;
 var music_baseurl   = "ftp://nfs/music/";
 var plenkingWait    = 30*60*1000;//30min
 var karmaWait       = 60*1000;
+var alarmWait       = 60*1000;
 var score_cooldown  = 2000;
 
 /*MPD SETTINGS*/
@@ -366,7 +367,16 @@ if(!disable_mpd){
     reply(sender, to, running_version)
 }).helptext = "print version number";
 
+var alarm_blocked = false;
 (commands['!alarm'] = function() {
+    if(alarm_blocked){
+        reply(sender, to, "alarm not ready.");
+        return;
+    }
+    alarm_blocked=true;
+    setTimeout(function(){
+        alarm_blocked = false;
+    }, alarmWait);
     var white = 3;
     var red   = 4;
     var on    = 1;
