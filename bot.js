@@ -391,6 +391,7 @@ var alarm_blocked = false;
     var on    = 1;
     var off   = 0;
     var waittime = 500;
+    reply(sender, to, "alarm has been activated. backspace is now in defcon 2".);
     l_webrelais.info("alarm in channel %s by user %s", sender, to);
     webrelais.set_port(white, on, function(){
         setTimeout(function(){
