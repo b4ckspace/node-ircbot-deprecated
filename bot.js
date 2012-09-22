@@ -70,6 +70,8 @@ var IrcBot = function(){
     require('./modules/irc_bckspc.js')(config, log4js, this);
     if(!disable_mpd)
         require('./modules/irc_mpd.js')(config, log4js, this);
+
+    require('./modules/irc_github.js')(config, log4js, this);
 };
 
 IrcBot.prototype.sendToWho = function(sender, to){
