@@ -1,23 +1,29 @@
+var FILTERS = {};
+var COMMANDS = {};
+var LOGGER;
+var CONFIG;
+
+var MODULE_NAME = "MPD";
+
 var util        = require('util');
-var commands = {};
-var l_mpd;
-var config;
+var mpdSocket   = require('mpdsocket');
+
 /*MPD SETTINGS*/
 var mpd_host    = '10.1.20.5';
 var mpd_port    = '6600';
 var music_baseurl   = "ftp://nfs/music/";
 var mpd;
-var mpdSocket   = require('mpdsocket');
 
 
 
 
-(commands['!np'] = function(sender, to){
+
+(COMMANDS['!np'] = function(sender, to){
     var that=this;
     try{
         mpd.send('currentsong',function(info) {
             if(!info['_OK']){
-                l_mpd.error('np mpc not ok: ' + util.inspect(info));
+                LOGGER.error('np mpc not ok: ' + util.inspect(info));
                 that.reply(sender, to, "mpd error :(");
                 return;
             }
@@ -35,63 +41,63 @@ var mpdSocket   = require('mpdsocket');
         });
     }catch(e){
         that.reply(sender, to, "mpd error :(");
-        l_mpd.error('np exception' + util.inspect(e));
+        LOGGER.error('np exception' + util.inspect(e));
     }
 }).helptext = "now playing.";
 
-(commands['!addstream'] = function(sender, to, media){
+(COMMANDS['!addstream'] = function(sender, to, media){
     var that = this;
     try{
         mpd.send( ('add ' + media), function(info) {
             if(info._OK){
                 that.reply(sender, to, "added " + media + " to playlist");
-                l_mpd.info("addstream user:" + sender + " stream: " + media + " mpd: " + util.inspect(info));
+                LOGGER.info("addstream user:" + sender + " stream: " + media + " mpd: " + util.inspect(info));
             }else{
-                l_mpd.error("addstream user:" + sender + " stream: " + media + " mpd: " + util.inspect(info));
+                LOGGER.error("addstream user:" + sender + " stream: " + media + " mpd: " + util.inspect(info));
                 that.reply(sender, to, "error adding item to playlist :(");
             }
         });
     }catch(e){
         that.reply(sender, to, "error adding item to playlist :(");
-        l_mpd.error("addstream exception: " + util.inspect(e));
+        LOGGER.error("addstream exception: " + util.inspect(e));
     }
 }).helptext = "adds the stream to the mpd playlist.";
 
-(commands['!playstream'] = function(sender, to, media){
+(COMMANDS['!playstream'] = function(sender, to, media){
     var that = this;
     try{
         mpd.send( ('addid ' + media), function(info) {
             if(info._OK){
                 mpd.send( ('playid ' + info.Id), function(info) {
                     if(info._OK){
-                        l_mpd.info("playstream user:" + sender + " stream: " + media + " mpd: " + util.inspect(info));
+                        LOGGER.info("playstream user:" + sender + " stream: " + media + " mpd: " + util.inspect(info));
                         that.reply(sender, to, "playing " + media);
                     }else{
-                        l_mpd.error("playstream s2 user:" + sender + " stream: " + media + " mpd: " + util.inspect(info));
+                        LOGGER.error("playstream s2 user:" + sender + " stream: " + media + " mpd: " + util.inspect(info));
                         that.reply(sender, to, "error playing item:(");
                     }
                 });
             }else{
-                l_mpd.error("playstream s1 user:" + sender + " stream: " + media + " mpd: " + util.inspect(info));
+                LOGGER.error("playstream s1 user:" + sender + " stream: " + media + " mpd: " + util.inspect(info));
                 that.reply(sender, to, "error playing item:(");
             }
         });
     }catch(e){
         this.reply(sender, to, "error playing item :(");
-        l_mpd.error("playstream exception user:" + sender + " stream: " + media + " mpd: " + util.inspect(e));
+        LOGGER.error("playstream exception user:" + sender + " stream: " + media + " mpd: " + util.inspect(e));
     }
 }).helptext = "play the given stream.";
 
-(commands['!add'] = function(sender, to){
+(COMMANDS['!add'] = function(sender, to){
     var args = Array.prototype.slice.call(arguments);
     var term = args.slice(2).join(' ');
-    l_mpd.info("search term: " + term);
+    LOGGER.info("search term: " + term);
     var that = this;
     try{
         mpd.send('search any "' + term + '"', function(response){
             if(response['file']){ //if file is set, the response is no list
                 mpd.send( ('add "' + response['file'] + '"'), function(info) {
-                    l_mpd.info("add to playlist " + util.inspect(info));
+                    LOGGER.info("add to playlist " + util.inspect(info));
                     that.reply(sender, to, 'added "'+response['file']+'" to playlist.');
                 });
             }else if (response["_ordered_list"]){
@@ -102,11 +108,11 @@ var mpdSocket   = require('mpdsocket');
         });
     }catch(e){
         this.reply(sender, to, "error adding item :(");
-        l_mpd.error("add exception user:" + sender + " term: " + term + " mpd: " + util.inspect(e));
+        LOGGER.error("add exception user:" + sender + " term: " + term + " mpd: " + util.inspect(e));
     }
 }).helptext = "add the song matching the searchterm to the playlist.";
 
-(commands['!npfile'] = function(sender, to){
+(COMMANDS['!npfile'] = function(sender, to){
     var that = this;
     try{
         mpd.send('currentsong',function(response) {
@@ -114,28 +120,53 @@ var mpdSocket   = require('mpdsocket');
         });
     }catch(e){
         this.reply(sender, to, "error getting file :(");
-        l_mpd.error("npfile exception user:" + sender + " term: " + term + " mpd: " + util.inspect(e));
+        LOGGER.error("npfile exception user:" + sender + " term: " + term + " mpd: " + util.inspect(e));
     }
 }).helptext = "get the path to the current playing file";
 
 module.exports = function(cfg, logger, bot){
-    l_mpd = logger.getLogger("mpd");
+    LOGGER = logger.getLogger("mpd");
     config=cfg;
     /* MPD SETUP*/
     var mpdInit = function(){
-        l_mpd.debug("reconnect");
+        LOGGER.debug("reconnect");
         mpd = new mpdSocket(mpd_host, mpd_port);
         mpd.on('close', function(){
-            l_mpd.debug("close");
+            LOGGER.debug("close");
             mpdInit();
         });
         mpd.on('error', function(text){
-            l_mpd.error(text);
+            LOGGER.error(text);
             setTimeout(mpdInit, 5000);
         });
     };
     mpdInit();
-    for(key in commands){
-        bot.commands[key] = commands[key];
+    for(key in COMMANDS){
+        bot.COMMANDS[key] = COMMANDS[key];
     }
+};
+
+module.exports = function(cfg, log, bot){
+    LOGGER = log.getLogger(MODULE_NAME);
+    CONFIG = cfg;
+    for(key in COMMANDS){
+        bot.commands[key] = COMMANDS[key];
+    }
+    for(key in FILTERS){
+        bot.filters[key] = FILTERS[key];
+    }
+    
+    var mpdInit = function(){
+        LOGGER.debug("reconnect");
+        mpd = new mpdSocket(mpd_host, mpd_port);
+        mpd.on('close', function(){
+            LOGGER.debug("close");
+            mpdInit();
+        });
+        mpd.on('error', function(text){
+            LOGGER.error(text);
+            setTimeout(mpdInit, 5000);
+        });
+    };
+    mpdInit();
 };
