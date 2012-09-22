@@ -5,8 +5,8 @@ var CONFIG;
 
 var MODULE_NAME = "your name here";
 
-var bckspcApi   = require('./bckspcapi.js');
-var webrelaisApi= require('./webrelais.js');
+var bckspcApi   = require('../bckspcapi.js');
+var webrelaisApi= require('../webrelais.js');
 var webrelais   = new webrelaisApi.Client("https://webrelais.bckspc.de:443");
 var spaceApi    = new bckspcApi();
 var alarmWait   = 60*1000;

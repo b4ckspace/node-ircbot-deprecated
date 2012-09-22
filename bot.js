@@ -64,12 +64,12 @@ var IrcBot = function(){
     this.filters    = {};
     this.blacklists = {};
     //this.irc_client = ircclient;
-    require('./irc_core.js')(config, log4js, this);
-    require('./irc_plenking.js')(config, log4js, this);
-    require('./irc_karma.js')(config, log4js, this);
-    require('./irc_bckspc.js')(config, log4js, this);
+    require('./modules/irc_core.js')(config, log4js, this);
+    require('./modules/irc_plenking.js')(config, log4js, this);
+    require('./modules/irc_karma.js')(config, log4js, this);
+    require('./modules/irc_bckspc.js')(config, log4js, this);
     if(!disable_mpd)
-        require('./irc_mpd.js')(config, log4js, this);
+        require('./modules/irc_mpd.js')(config, log4js, this);
 };
 
 IrcBot.prototype.sendToWho = function(sender, to){
