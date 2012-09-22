@@ -3,7 +3,7 @@ var COMMANDS = {};
 var LOGGER;
 var CONFIG;
 
-var MODULE_NAME = "your name here";
+var MODULE_NAME = "BACKSPACE";
 
 var bckspcApi   = require('../bckspcapi.js');
 var webrelaisApi= require('../webrelais.js');
