@@ -12,6 +12,9 @@ var karma_timeouts={};
 
 (COMMANDS['!karma'] = function(sender, to, user){
     var that = this;
+    if(sender == user){
+        user = undefined;
+    }
     var who  = user?user:sender;
     getKarma(who, function(karma){
         if(user){
