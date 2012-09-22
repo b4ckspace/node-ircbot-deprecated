@@ -36,8 +36,8 @@ log4js.configure({
 });
 
 
-var l_other = log4js.getLogger("other");
-l_other.info("STARTUP");
+var logger = log4js.getLogger("CORE");
+logger.info("STARTUP");
 
 
 var IrcBot = function(){
@@ -58,7 +58,7 @@ var IrcBot = function(){
         }
     });
     this.irc_client .addListener('error', function(message){
-        l_other.error(JSON.stringify(message));
+        logger.error(JSON.stringify(message));
     });
     this.commands   = {}; 
     this.filters    = {};
