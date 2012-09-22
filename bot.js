@@ -40,11 +40,6 @@ var l_other = log4js.getLogger("other");
 l_other.info("STARTUP");
 
 
-/*IRC SETUP*/
-
-
-/* SPACE API SETUP*/
-
 var IrcBot = function(){
     var that = this;
     this.irc_client = new irc.Client( irc_server, nick, {
