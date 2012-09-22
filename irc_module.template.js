@@ -9,6 +9,7 @@ var MODULE_NAME = "your name here";
 
 module.exports = function(cfg, log, bot){
     LOGGER = log.getLogger(MODULE_NAME);
+    CONFIG = cfg;
     for(key in COMMANDS){
         bot.commands[key] = COMMANDS[key];
     }
