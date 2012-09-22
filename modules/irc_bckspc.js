@@ -91,14 +91,14 @@ module.exports = function(cfg, log, bot){
         LOGGER.debug("set channel, topic: " + channel + " , " + topic);
     });
     spaceApi.on('isopen', function(open){
-        for(var k in channels){
-            setTopic(k, bot.irc_client);
+        for(var channel in topics){
+            setTopic(channel, bot.irc_client);
         }
     });
 };
 
 
-var topics      = {};
+var topics  = {};
 var setTopic = function(channel, connection){
     if(!spaceApi.isReady()){
         setTimeout(function(){setTopic(channel, connection)}, 500);
