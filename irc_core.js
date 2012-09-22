@@ -1,5 +1,6 @@
 var FILTERS = {};
 var COMMANDS = {};
+var BLACKLISTS = {};
 var LOGGER;
 var CONFIG;
 
@@ -59,7 +60,7 @@ var score_cooldown = 2 * 1000;
     this.reply(sender, to, '!commands, !more <command> or visit https://github.com/b4ckspace/ircbot');
 }).helptext = "pong";
 
-FILTERS.flood = function(message, sender, to){
+BLACKLISTS.flood = function(message, sender, to){
     if(dropMessage(message, sender, to)){
         if(getBlCount(sender)==5){
             this.reply(sender, to, "Wat R U Doin");
@@ -78,6 +79,9 @@ module.exports = function(cfg, log, bot){
     }
     for(key in FILTERS){
         bot.filters[key] = FILTERS[key];
+    }
+    for(key in BLACKLISTS){
+        bot.blacklists[key] = BLACKLISTS[key];
     }
     exec('git log -n 1 HEAD --format=oneline', function (e, stdout, stderr) {
         if (e !== null) {

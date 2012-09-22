@@ -63,10 +63,11 @@ var IrcBot = function(){
         }
     });
     this.irc_client .addListener('error', function(message){
-        l_other.error(message);
+        l_other.error(JSON.stringify(message));
     });
-    this.commands={}; 
-    this.filters={};
+    this.commands   = {}; 
+    this.filters    = {};
+    this.blacklists = {};
     //this.irc_client = ircclient;
     require('./irc_core.js')(config, log4js, this);
     require('./irc_plenking.js')(config, log4js, this);
@@ -94,13 +95,23 @@ IrcBot.prototype.messageDispatcher = function(message, sender, to){
     var args    = message.split(' ');
     var command = args[0];
     var fun;
-    if(fun = this.commands[command]) 
+    if(fun = this.commands[command]){
+        if(this.isBlacklisted(message, sender, to))
+            return;
         fun.apply(this, [sender, to].concat(args.slice(1)) );
+    }
 };
 
-IrcBot.prototype.contentFilter = function(message, sender, channel){
+IrcBot.prototype.contentFilter = function(message, sender, to){
     for(var name in this.filters){
-        if( this.filters[name].apply(bot, [message, sender, channel]))
+        if( this.filters[name].apply(bot, [message, sender, to]))
+            return true;
+    }
+};
+
+IrcBot.prototype.isBlacklisted = function(message, sender, to){
+    for(var name in this.blacklists){
+        if( this.blacklists[name].apply(bot, [message, sender, to]))
             return true;
     }
 };
