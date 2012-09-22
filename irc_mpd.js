@@ -14,10 +14,6 @@ var mpd_port    = '6600';
 var music_baseurl   = "ftp://nfs/music/";
 var mpd;
 
-
-
-
-
 (COMMANDS['!np'] = function(sender, to){
     var that=this;
     try{
@@ -155,7 +151,7 @@ module.exports = function(cfg, log, bot){
     for(key in FILTERS){
         bot.filters[key] = FILTERS[key];
     }
-    
+
     var mpdInit = function(){
         LOGGER.debug("reconnect");
         mpd = new mpdSocket(mpd_host, mpd_port);
