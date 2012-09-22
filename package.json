@@ -30,7 +30,8 @@
         "irc":       "0.3.x",
         "mpdsocket": "0.1.x",
         "nstore":    "0.5.x",
-        "log4js":    "0.5.x"
+        "log4js":    "0.5.x",
+        "github":    "0.1.x"
     },
     "engine": {
         "node": ">=0.6"
