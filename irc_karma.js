@@ -1,12 +1,16 @@
-var nStore      = require('nstore');
-var karma = nStore.new('data/karma.db', function () {});
-var logger;
-var config;
-var karmaWait       = 60*1000;
+var FILTERS = {};
+var COMMANDS = {};
+var LOGGER;
+var CONFIG;
 
+var MODULE_NAME = "KARMA";
+
+var nStore      = require('nstore');
+var karma       = nStore.new('data/karma.db', function () {});
+var karmaWait   = 60*1000;
 var karma_timeouts={};
-var commands = {};
-(commands['!karma'] = function(sender, to, user){
+
+(COMMANDS['!karma'] = function(sender, to, user){
     var that = this;
     var who  = user?user:sender;
     getKarma(who, function(karma){
@@ -18,58 +22,68 @@ var commands = {};
     });
 }).helptext = "get own karma or of the given user";
 
-var filters = {
-    karma : function(message, sender, to){
-        var karma_regex = /^([\w_\-\\\[\]\{\}\^`\|]+)[\s,:]*\+[\+1]/;
-        var karmas = message.match(karma_regex);
-        if(!karmas){
+FILTERS.karma = function(message, sender, to){
+    var karma_regex = /^([\w_\-\\\[\]\{\}\^`\|]+)[\s,:]*\+[\+1]/;
+    var karmas = message.match(karma_regex);
+    if(!karmas){
+        return;
+    }
+    var nick = karmas[1];
+    if(nick == sender){
+        this.reply(sender, to, 'eigenlob stinkt :P');
+        LOGGER.info('self-karma %s', nick);
+        return;
+    }
+    if(karma_timeouts[sender]){
+        LOGGER.info('karma while timeout');
+        this.reply(sender, to, 'du kannst nur einmal pro minute karma verteilen.');
+        return;
+    }
+    if(!this.isChannel(sender, to)){
+        this.reply(sender, to, 'you can only give karma in channels.')
+        LOGGER.debug('no channel msg: %s sender: %s to: %s', message, sender, to);
+        return;
+    }
+    this.irc_client.once('names', function(channel, names){
+        if(channel != to){
+            LOGGER.warn('channel(%s) != to(%s)', channel, to);
             return;
         }
-        var nick = karmas[1];
-        if(nick==sender){
-            this.reply(sender, to, 'eigenlob stinkt :P');
-            logger.info('self-karma %s', nick);
-            return;
+        if(names[nick] != undefined){
+            addKarma(nick);
+            LOGGER.info('%s gave %s karma (%s)', sender, nick, channel);
+            karma_timeouts[sender] = true;
+            setTimeout(function(){
+                karma_timeouts[sender] = undefined;
+                LOGGER.info('karma timeout for user %s cleared', sender);
+            },karmaWait);
+        }else{
+            LOGGER.warn('%s tried to give karma to %s (%s). but user is not in channel', sender, nick, channel);
         }
-        if(karma_timeouts[sender]){
-            logger.info('karma while timeout');
-            this.reply(sender, to, 'du kannst nur einmal pro minute karma verteilen.');
-            return;
-        }
-        if(!this.isChannel(sender, to)){
-            this.reply(sender, to, 'you can only give karma in channels.')
-            logger.debug('no channel msg: %s sender: %s to: %s', message, sender, to);
-            return;
-        }
-        this.irc_client.once('names', function(channel, names){
-            if(channel != to){
-                logger.warn('channel(%s) != to(%s)', channel, to);
-                return;
-            }
-            if(names[nick]!=undefined){
-                addKarma(nick);
-                logger.info('%s gave %s karma (%s)', sender, nick, channel);
-                karma_timeouts[sender]=true;
-                setTimeout(function(){
-                    karma_timeouts[sender]=undefined;
-                    logger.info('karma timeout for user %s cleared', sender);
-                },karmaWait);
-            }else{
-                logger.warn('%s tried to give karma to %s (%s). but user is not in channel', sender, nick, channel);
-            }
-        });
-        this.irc_client.send('names', to);
-    },
+    });
+    this.irc_client.send('names', to);
+};
+
+
+module.exports = function(cfg, log, bot){
+    LOGGER = log.getLogger(MODULE_NAME);
+    CONFIG = cfg;
+    for(key in COMMANDS){
+        bot.commands[key] = COMMANDS[key];
+    }
+    for(key in FILTERS){
+        bot.filters[key] = FILTERS[key];
+    }
 };
 
 var addKarma = function(user){
     getKarma(user, function(count){
         karma.save(user, {karma: count+1}, function (err) {
             if (err) {
-                logger.error("karma save error: " + util.inspect(err));
+                LOGGER.error("karma save error: " + util.inspect(err));
                 return;
             }
-            logger.info("saved %s karma for %s", count+1, user);
+            LOGGER.info("saved %s karma for %s", count+1, user);
         });
     });
 };
@@ -84,15 +98,4 @@ var getKarma = function(user, callback){
         //console.log(doc);
         callback(doc.karma);
     });
-};
-
-module.exports = function(cfg, log, bot){
-    logger = log.getLogger("karma");
-    config = cfg;
-    for(key in commands){
-        bot.commands[key] = commands[key];
-    }
-    for(key in filters){
-        bot.filters[key] = filters[key];
-    }
 };
