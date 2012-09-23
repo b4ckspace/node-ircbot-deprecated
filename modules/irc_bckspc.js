@@ -101,7 +101,9 @@ module.exports = function(cfg, log, bot){
 var topics  = {};
 var setTopic = function(channel, connection){
     if(!spaceApi.isReady()){
-        setTimeout(function(){setTopic(channel, connection)}, 500);
+        spaceApi.once('ready', function(){
+            setTopic(channel, connection)
+        });
         return;
     }
     if(spaceApi.isOpen()){

@@ -46,19 +46,21 @@ bckspcApi.prototype.updateSpaceStatus = function(){
                 that.emit('membercount', status['members']);
                 console.log("emit membercount" + status['members']);
             }
-
-            if( (status['members']>0) && !that.isOpen()){
+            var wasopen = that.isOpen();
+            that.lastStatus = status;
+            var nowopen = that.isOpen();
+            if( (!wasopen) && (nowopen) ){
                 console.log("emit open, isopen true");
                 that.emit('isopen', true);
                 that.emit('open');
             }
-            if( (status['members']==0) && that.isOpen()){
+            if( (wasopen) && (!nowopen) ){
                 console.log("emit closed, isopen false");
                 that.emit('isopen', false);
                 that.emit('closed');
             }
 
-            that.lastStatus = status;
+            
         });
     }).on('error', function(e) {
         console.log("Got http status error error: " + e.message);
