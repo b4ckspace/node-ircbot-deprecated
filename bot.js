@@ -68,6 +68,7 @@ var IrcBot = function(){
     require('./modules/irc_plenking.js')(config, log4js, this);
     require('./modules/irc_karma.js')(config, log4js, this);
     require('./modules/irc_bckspc.js')(config, log4js, this);
+    require('./modules/irc_webrelais.js')(config, log4js, this);
     if(!disable_mpd)
         require('./modules/irc_mpd.js')(config, log4js, this);
 
