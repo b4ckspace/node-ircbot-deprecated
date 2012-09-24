@@ -5,7 +5,9 @@ var CONFIG;
 
 var MODULE_NAME = "KARMA";
 
+var util        = require("util");
 var nStore      = require('nstore');
+nStore          = nStore.extend(require('nstore/query')());
 var karma       = nStore.new('data/karma.db', function () {});
 var karmaWait   = 60*1000;
 var karma_timeouts={};
@@ -24,6 +26,29 @@ var karma_timeouts={};
         }
     });
 }).helptext = "get own karma or of the given user";
+
+(COMMANDS["!karmatop"] = function(sender, to){
+    var that=this;
+    getAll(function(error, data){
+        if(error){
+            that.reply(sender, to, "error getting karma.");
+            return;
+        }
+        var karmanicks = [];
+        for(nick in data){
+            karmanicks.push({nick:nick, karma:data[nick].karma});
+        }
+        karmanicks = karmanicks .sort(function(a,b){return a.karma-b.karma})
+                                .reverse()
+                                .slice(0, 3)
+                                .map(function(u){return u.nick + ": " + u.karma})
+                                .join(', ');
+        that.reply(sender, to, karmanicks)
+        //console.log(karmanicks);
+    });
+}).helptext = "karma highscore";
+
+
 
 FILTERS.karma = function(message, sender, to){
     var karma_regex = /^([\w_\-\\\[\]\{\}\^`\|]+)[\s,:]*\+[\+1]/;
@@ -58,7 +83,7 @@ FILTERS.karma = function(message, sender, to){
             karma_timeouts[sender] = true;
             setTimeout(function(){
                 karma_timeouts[sender] = undefined;
-                LOGGER.info('karma timeout for user %s cleared', sender);
+                LOGGER.info('timeout for user %s cleared', sender);
             },karmaWait);
         }else{
             LOGGER.warn('%s tried to give karma to %s (%s). but user is not in channel', sender, nick, channel);
@@ -83,7 +108,7 @@ var addKarma = function(user){
     getKarma(user, function(count){
         karma.save(user, {karma: count+1}, function (err) {
             if (err) {
-                LOGGER.error("karma save error: " + util.inspect(err));
+                LOGGER.error("save error: " + util.inspect(err));
                 return;
             }
             LOGGER.info("saved %s karma for %s", count+1, user);
@@ -100,5 +125,16 @@ var getKarma = function(user, callback){
         }
         //console.log(doc);
         callback(doc.karma);
+    });
+};
+
+var getAll = function(callback){
+    karma.all(function(err, data){
+        var error = false;
+        if (err) {
+            LOGGER.error("getAll error: " + JSON.stringify(util.inspect(err)));
+            error = true;
+        }
+        callback(error, data);
     });
 };
