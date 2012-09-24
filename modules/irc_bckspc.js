@@ -53,9 +53,11 @@ var alarm_blocked = false;
     this.reply(sender, to, "alarm has been activated. backspace is now in defcon 2.");
     LOGGER.info("alarm in channel %s by user %s", to, sender);
     webrelais.get_port(white, function(error, reply){
-        old_white = reply.response ? 1 : 0;
+        old_white = reply.response ? on : off;
+        webrelais.set_port(white, off);
         webrelais.get_port(red, function(error, reply){
-            old_red = reply.response ? 1 : 0;
+            old_red = reply.response ? on : off;
+            webrelais.set_port(red, off);
             webrelais.set_port(white, on, function(){
                 setTimeout(function(){
                     webrelais.set_port(white, off);
