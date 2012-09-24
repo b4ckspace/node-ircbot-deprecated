@@ -1,9 +1,7 @@
-
-var  util = require('util')
-    ,events = require('events')
-    ,https = require('https')
-    ,http = require('http')
-    ,url = require('url');
+var  util   = require('util')
+    ,https  = require('https')
+    ,http   = require('http')
+    ,url    = require('url');
 
 
 var  RESET  = 'DELETE'
@@ -11,13 +9,11 @@ var  RESET  = 'DELETE'
     ,SET    = 'POST';
 
 var Client = function( baseurl ) {
-    events.EventEmitter.call(this);
-    this.baseurl = baseurl;
+    this.baseurl  = baseurl;
     this.username = false;
     this.password = false;
 };
 
-util.inherits(Client, events.EventEmitter);
 
 Client.prototype.authenticate = function( username, password ) {
     this.username = username;
@@ -30,23 +26,44 @@ Client.prototype.needs_auth = function() {
 
 Client.prototype.send_command = function( path, type, callback ) {
 
-    this.once('command_sent', callback);
     var options     = url.parse(this.baseurl + path);
     options.method  = type;
-    options.headers = {'Content-length':0};
+    options.headers = {'Content-length': 0};
+
     if( this.needs_auth() ) {
         options['auth'] = this.username + ":" + this.password;
     }
+
     var http_s = options.protocol=='https:' ? https : http;
 
     // Set up the request
     var client = this;
     var req = http_s.request(options, function(res) {
+        
         res.setEncoding('utf8');
-        res.on('end', function () {
-            console.log("Emit event");
-            client.emit('command_sent');
+
+        var resString = '';
+        res.on('data', function( data ){
+            resString += data;
         });
+
+        res.on('end', function () {
+
+            var reply = []
+               ,error = true;
+
+            try {
+                reply = JSON.parse(resString);
+                error = false;
+            } catch( e ) {
+                console.log( 'json parsing error: ' + e.message );
+            }
+
+            if( typeof(callback) == 'function' ) {
+                callback(error, reply);
+            }
+        });
+
     });
 
     req.end();
