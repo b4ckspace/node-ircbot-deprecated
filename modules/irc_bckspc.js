@@ -48,22 +48,31 @@ var alarm_blocked = false;
     var on    = 1;
     var off   = 0;
     var waittime = 500;
+    var old_white;
+    var old_red;
     this.reply(sender, to, "alarm has been activated. backspace is now in defcon 2.");
     LOGGER.info("alarm in channel %s by user %s", to, sender);
-    webrelais.set_port(white, on, function(){
-        setTimeout(function(){
-            webrelais.set_port(white, off, function(){});
-            webrelais.set_port(red, on, function(){
+    webrelais.get_port(white, function(error, reply){
+        old_white = reply.response ? 1 : 0;
+        webrelais.get_port(red, function(error, reply){
+            old_red = reply.response ? 1 : 0;
+            webrelais.set_port(white, on, function(){
                 setTimeout(function(){
-                    webrelais.set_port(red, off, function(){});
-                    webrelais.set_port(white, on, function(){
+                    webrelais.set_port(white, off);
+                    webrelais.set_port(red, on, function(){
                         setTimeout(function(){
-                            webrelais.set_port(white, off, function(){});
+                            webrelais.set_port(red, off);
+                            webrelais.set_port(white, on, function(){
+                                setTimeout(function(){
+                                    webrelais.set_port(white, old_white);
+                                    webrelais.set_port(red, old_red);
+                                }, waittime);
+                            });
                         }, waittime);
                     });
                 }, waittime);
             });
-        }, waittime);
+        })
     });
 }).helptext = "flash the emergency light :)";
 
