@@ -4,6 +4,7 @@ var EventEmitter    = require('events').EventEmitter;
 var bckspcApi = function bckspcApi(){
     this.fetchTimer = 30000;
     this.lastStatus = null;
+    this.lastMembers = [];
     this.updateSpaceStatus();
 };
 
@@ -36,6 +37,7 @@ bckspcApi.prototype.updateSpaceStatus = function(){
                 console.log( 'json parsing error: ' + e.message );
                 return;
             }
+            that.updateMembers(status.members_present);
 
             if(!that.lastStatus){
                 that.lastStatus = status;
@@ -80,6 +82,31 @@ bckspcApi.prototype.isOpen = function(){
 
 bckspcApi.prototype.openCount = function(){
     return this.lastStatus && this.lastStatus['members'];
+};
+
+bckspcApi.prototype.updateMembers = function(members){
+    var nicks = members.map(function(member){return member.nickname});
+    if(!this.isReady()){ // don't emit new members on api start
+        this.lastMembers = nicks;
+        return;
+    }
+    for(var i in nicks){
+        if(this.lastMembers.indexOf(nicks[i]) == -1 ){
+            console.log('emit join %s', nicks[i]);
+            this.emit('join', nicks[i]);
+        }
+    }
+    for(var i in this.lastMembers){
+        if(nicks.indexOf(this.lastMembers[i]) == -1 ){
+            console.log('emit part %s', this.lastMembers[i]);
+            this.emit('part', this.lastMembers[i]);
+        }
+    }
+    this.lastMembers = nicks;
+};
+
+bckspcApi.prototype.getMembers = function(){
+    return this.lastMembers;
 };
 
 
