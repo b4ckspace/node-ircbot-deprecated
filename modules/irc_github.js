@@ -20,15 +20,15 @@ var report_locked = false;
     }
     report_locked = true;
     setTimeout(function(){report_locked=false;}, report_timeout);
-    var that=this;
-    var args = Array.prototype.slice.call(arguments);
-    var text = args.slice(2).join(' ');
-    var title = "irc bugreport by " + sender;
-    var data = {user :  CONFIG.github_repouser, 
-                repo:   CONFIG.github_repo, 
-                title:  title, 
-                body:   text, 
-                labels: ['irc']};
+    var that  = this;
+    var args  = Array.prototype.slice.call(arguments);
+    var title = "irc: " + args.slice(2).join(' ');
+    var text  = "irc bugreport by " + sender;
+    var data  = { user   : CONFIG.github_repouser, 
+                  repo   : CONFIG.github_repo, 
+                  title  : title, 
+                  body   : text, 
+                  labels : ['irc']};
     LOGGER.info("create issue user: %s channel: %s, data: %s", sender, to, JSON.stringify(data));
     github.issues.create(data, function(error, response){
         if(error){
