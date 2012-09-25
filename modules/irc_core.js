@@ -27,11 +27,7 @@ var score_cooldown = 2 * 1000;
 }).helptext = "update bot to latest git version.";
 
 (COMMANDS['!commands'] = function(sender, to){
-    var commandlist = "";
-    for(cmd in this.commands){
-        commandlist += cmd + ", ";
-    }
-    this.reply(sender, to, commandlist);
+    this.reply(sender, to, Object.keys(this.commands).join(', '));
 }).helptext = "get a list of all commands";
 
 (COMMANDS['!more'] = function(sender, to, command){
