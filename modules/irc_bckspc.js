@@ -19,6 +19,9 @@ var spaceApi    = new bckspcApi();
     
 }).helptext = "get the space status";
 
+(COMMANDS['!inspace'] = function(sender, to, command){
+    this.reply(sender, to, spaceApi.getMembers().join(', '));
+}).helptext = 'get the members that are currently in the space.';
 
 (COMMANDS['!pampus'] = function(sender, to, command){
     this.reply(sender, to, 'Dem Pampus fehlt Salz!');
