@@ -57,6 +57,11 @@ FILTERS.karma = function(message, sender, to){
         return;
     }
     var nick = karmas[1];
+	if(!this.isChannel(sender, to)){
+        this.reply(sender, to, 'you can only give karma in channels.')
+        LOGGER.debug('no channel msg: %s sender: %s to: %s', message, sender, to);
+        return;
+    }
     if(nick == sender){
         this.reply(sender, to, 'eigenlob stinkt :P');
         LOGGER.info('self-karma %s', nick);
@@ -65,11 +70,6 @@ FILTERS.karma = function(message, sender, to){
     if(karma_timeouts[sender]){
         LOGGER.info('karma while timeout');
         this.reply(sender, to, 'du kannst nur einmal pro minute karma verteilen.');
-        return;
-    }
-    if(!this.isChannel(sender, to)){
-        this.reply(sender, to, 'you can only give karma in channels.')
-        LOGGER.debug('no channel msg: %s sender: %s to: %s', message, sender, to);
         return;
     }
     this.irc_client.once('names', function(channel, names){
