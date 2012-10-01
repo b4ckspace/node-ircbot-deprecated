@@ -86,7 +86,7 @@ IrcBot.prototype.isChannel = function(sender, to){
 
 IrcBot.prototype.reply = function(sender, to, message){
     if(this.isChannel(sender, to))
-        message = sender + " " + message;
+        message = sender + ": " + message;
     this.irc_client.say(this.sendToWho(sender, to), message);
 };
 
