@@ -58,10 +58,9 @@ var initServer = function(nbot){
             response.end();
         });
     });
-    var clientIp = CONFIG.webmessage_ip;
     var port     = CONFIG.webmessage_port;
-    LOGGER.info('starting webMessage server. listening on %s:%s', clientIp, port);
-    server.listen(port, clientIp);
+    LOGGER.info('starting webMessage server. listening on port %s', port);
+    server.listen(port);
 };
 
 

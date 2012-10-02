@@ -18,5 +18,4 @@ exports.github_token    = env['github_token']   ||'your token here';
 exports.github_repouser = env['github_repouser']||'ydnax';
 exports.github_repo     = env['github_repo']    ||'test-repo';
 
-exports.webmessage_ip = env['webmessage_ip'] || '127.0.0.1';
 exports.webmessage_port = env['webmessage_port'] || '8042';
