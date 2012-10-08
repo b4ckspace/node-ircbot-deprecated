@@ -151,18 +151,26 @@ module.exports = function(cfg, log, bot){
     for(key in FILTERS){
         bot.filters[key] = FILTERS[key];
     }
-
-    var mpdInit = function(){
-        LOGGER.debug("reconnect");
-        mpd = new mpdSocket(mpd_host, mpd_port);
-        mpd.on('close', function(){
-            LOGGER.debug("close");
-            mpdInit();
-        });
-        mpd.on('error', function(text){
-            LOGGER.error(text);
-            setTimeout(mpdInit, 5000);
-        });
-    };
     mpdInit();
+};
+
+
+var mpdInit = function(){
+    var reconnect = false;
+    LOGGER.debug("reconnect");
+    mpd = new mpdSocket(mpd_host, mpd_port);
+    mpd.on('close', function(){
+        LOGGER.debug("close");
+        if(!reconnect){
+            reconnect=true;
+            setTimeout(mpdInit, 5000);
+        }
+    });
+    mpd.on('error', function(text){
+        LOGGER.error(text);
+        if(!reconnect){
+            reconnect=true;
+            setTimeout(mpdInit, 5000);
+        }
+    });
 };
