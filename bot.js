@@ -63,6 +63,7 @@ var IrcBot = function(){
     this.commands   = {}; 
     this.filters    = {};
     this.blacklists = {};
+    this.channelwarn = {};
     //this.irc_client = ircclient;
     require('./modules/irc_core.js')(config, log4js, this);
     require('./modules/irc_plenking.js')(config, log4js, this);
@@ -85,9 +86,26 @@ IrcBot.prototype.isChannel = function(sender, to){
     return to && to[0]=='#';
 };
 
-IrcBot.prototype.reply = function(sender, to, message){
-    if(this.isChannel(sender, to))
+IrcBot.prototype.reply = function(sender, to, message, nowarn){
+    var channelwarnTimeout = 5*60*1000;
+    var warnstart = 5;
+    if(this.isChannel(sender, to)){
         message = sender + ": " + message;
+        if(!nowarn){
+            var old = this.channelwarn[to];
+            this.channelwarn[to] = old?old+1:1;//fix if value is undefined
+            logger.debug("channelwarn incr %s:%s", to, this.channelwarn[to]);
+            var that = this;
+            setTimeout(function(){
+                that.channelwarn[to]--;
+                logger.debug("channelwarn cooldown: %s -> %s", to, that.channelwarn[to]);
+            }, channelwarnTimeout);
+            if(this.channelwarn[to]>=warnstart){
+                logger.info("channelwarn > 5 %s", to);
+                message = message + " tip: you can send most commands via query.";
+            }
+        }
+    }
     this.irc_client.say(this.sendToWho(sender, to), message);
 };
 
