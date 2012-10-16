@@ -28,6 +28,7 @@ var alarm_blocked = false;
     }, alarmWait);
     var white = 3;
     var red   = 4;
+    var light = 5;
     var on    = 1;
     var off   = 0;
     var waittime = 500;
@@ -35,6 +36,10 @@ var alarm_blocked = false;
     var old_red;
     this.reply(sender, to, "alarm has been activated. backspace is now in defcon 2.");
     LOGGER.info("alarm in channel %s by user %s", to, sender);
+    webrelais.set_port(light, on);
+    setTimeout(function(){
+        webrelais.set_port(light, off);
+    }, 5000);
     webrelais.get_port(white, function(error, reply){
         old_white = reply.response ? on : off;
         webrelais.set_port(white, off);
