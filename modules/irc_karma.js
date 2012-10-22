@@ -69,7 +69,7 @@ FILTERS.karma = function(message, sender, to){
     }
     if(karma_timeouts[sender]){
         LOGGER.info('karma while timeout');
-        this.reply(sender, to, 'du kannst nur einmal pro minute karma verteilen.');
+        this.reply(sender, to, 'du kannst nur einmal pro minute karma verteilen.', true);
         return;
     }
     this.irc_client.once('names', function(channel, names){
