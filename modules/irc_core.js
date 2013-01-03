@@ -18,7 +18,7 @@ var score_cooldown = 2 * 1000;
 (COMMANDS['!update'] = function(sender, to){
     var cmd = 'git pull origin master';
     LOGGER.info("update requested by %s in %s", sender, this.isChannel(sender,to)?to:'query' );
-    exec(cmd, function (e, stdout, stderr) {
+    exec(cmd, function (error, stdout, stderr) {
         LOGGER.info('exec cmd: ' + cmd + " stdout: " + JSON.stringify(stdout));
         if (e !== null) {
             LOGGER.error('exec cmd: ' + cmd + ' error: ' + error + "stderr: " + JSON.stringify(stderr));
