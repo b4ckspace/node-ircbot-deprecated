@@ -75,6 +75,7 @@ var IrcBot = function(){
 
     require('./modules/irc_github.js')(config, log4js, this);
     require('./modules/irc_weather.js')(config, log4js, this);
+    require('./modules/irc_autovoice.js')(config, log4js, this);
     //require('./modules/irc_webMessage.js')(config, log4js, this);
 };
 

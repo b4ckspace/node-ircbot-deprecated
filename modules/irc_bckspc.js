@@ -52,6 +52,7 @@ module.exports = function(cfg, log, bot){
             setTopic(channel, bot.irc_client);
         }
     });
+    bot._bckspcapi=spaceApi;
 };
 
 
