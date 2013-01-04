@@ -12,17 +12,11 @@ function sanitizeNick(nick) {
 }
 
 var inSpace = function(username){
-
-    var found = false;
-    bot_._bckspcapi.getMembers().some(function(value, key) {
+    return bot_._bckspcapi.getMembers().some(function(value, key) {
         if(sanitizeNick(value) == sanitizeNick(username)) {
-            found = true;
             return true;
         }
     });
-
-    return found;
-
 };
 
 var setAllChans = function(){
