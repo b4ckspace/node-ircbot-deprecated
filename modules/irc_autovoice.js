@@ -51,13 +51,8 @@ module.exports = function(cfg, log, bot){
     CONFIG = cfg;
     bot_   = bot;
     bot.irc_client.on('join', function(channel, nick, message){
-        if(nick==bot.nick){ // adjust +v on reconnect
-            LOGGER.debug('self join in %s detected, setting all user rights', channel);
-            setVoices(channel);
-        }else{
-            LOGGER.debug("user %s joined", nick);
-            setVoices(channel);
-        }
+        LOGGER.debug("user %s joined chanel", nick, channel);
+        setVoices(channel);
     });
     bot._bckspcapi.on('join', function(member){
         LOGGER.debug('member join: %s', member);
