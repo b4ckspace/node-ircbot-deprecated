@@ -63,10 +63,14 @@ module.exports = function(cfg, log, bot){
         setAllChans();
     });
     bot.irc_client.on('+mode', function(channel, by, mode, arg, msg){
+        if(by==bot.nick)
+            return;
         LOGGER.debug('+modechange: %s, %s, %s, %s, %s', channel, by, mode, arg, msg);
         setVoices(channel);
     });
     bot.irc_client.on('-mode', function(channel, by, mode, arg, msg){
+        if(by==bot.nick)
+            return;
         LOGGER.debug('-modechange: %s, %s, %s, %s, %s', channel, by, mode, arg, msg);
         setVoices(channel);
     });
