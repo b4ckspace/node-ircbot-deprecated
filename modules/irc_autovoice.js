@@ -7,13 +7,13 @@ var MODULE_NAME = "AUTOVOICE";
 var util = require("util");
 var bot_;
 
-function sanitizeNick(nick) {
+function normalizeNick(nick) {
     return nick.replace(/[^a-zA-Z]+/, '').toLowerCase();    
 }
 
 var inSpace = function(username){
     return bot_._bckspcapi.getMembers().some(function(value, key) {
-        if(sanitizeNick(value) == sanitizeNick(username)) {
+        if(normalizeNick(value) == normalizeNick(username)) {
             return true;
         }
     });
