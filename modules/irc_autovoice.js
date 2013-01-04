@@ -16,6 +16,12 @@ var inSpace = function(username){
     }
 };
 
+var setAllChans = function(){
+    for(channel in bot_.topics){
+        setVoices(channel);
+    }
+};
+
 var setVoices = function(channel){
     bot_.irc_client.once('names', function(chname, names){
         if(channel!=chname){
@@ -55,18 +61,18 @@ module.exports = function(cfg, log, bot){
     });
     bot._bckspcapi.on('join', function(member){
         LOGGER.debug('member join: %s', member);
-        setVoices(channel);
-    });
-    bot._bckspcapi.on('+mode', function(channel, by, mode, arg, msg){
-        LOGGER.debug('+modechange: %s, %s, %s, %s, %s', channel, by, mode, arg, msg);
-        setVoices(channel);
-    });
-    bot._bckspcapi.on('-mode', function(channel, by, mode, arg, msg){
-        LOGGER.debug('-modechange: %s, %s, %s, %s, %s', channel, by, mode, arg, msg);
-        setVoices(channel);
+        setAllChans();
     });
     bot._bckspcapi.on('part', function(member){
         LOGGER.debug('member part: %s', member);
+        setAllChans();
+    });
+    bot.irc_client.on('+mode', function(channel, by, mode, arg, msg){
+        LOGGER.debug('+modechange: %s, %s, %s, %s, %s', channel, by, mode, arg, msg);
+        setVoices(channel);
+    });
+    bot.irc_client.on('-mode', function(channel, by, mode, arg, msg){
+        LOGGER.debug('-modechange: %s, %s, %s, %s, %s', channel, by, mode, arg, msg);
         setVoices(channel);
     });
     bot.irc_client.on('nick', function(oldnick, newnick, channels){
