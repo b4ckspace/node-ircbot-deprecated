@@ -25,7 +25,7 @@ var setAllChans = function(){
 var setVoices = function(channel){
     bot_.irc_client.once('names', function(chname, names){
         if(channel!=chname){
-            LOGGER.debug("setVoice channel!=nchannel %s != %s", channel, nchannel);
+            LOGGER.debug("setVoice channel!=nchannel %s != %s", channel, chname);
             return;
         }
         var voicepeople = {};
