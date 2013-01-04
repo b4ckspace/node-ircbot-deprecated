@@ -20,7 +20,7 @@ var score_cooldown = 2 * 1000;
     LOGGER.info("update requested by %s in %s", sender, this.isChannel(sender,to)?to:'query' );
     exec(cmd, function (error, stdout, stderr) {
         LOGGER.info('exec cmd: ' + cmd + " stdout: " + JSON.stringify(stdout));
-        if (e !== null) {
+        if (error !== null) {
             LOGGER.error('exec cmd: ' + cmd + ' error: ' + error + "stderr: " + JSON.stringify(stderr));
         }
     });
