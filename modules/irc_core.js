@@ -79,6 +79,11 @@ module.exports = function(cfg, log, bot){
     for(key in BLACKLISTS){
         bot.blacklists[key] = BLACKLISTS[key];
     }
+    bot.topics={};
+    bot.irc_client.addListener('topic', function (channel, topic, nick, message){
+        bot.topics[channel] = topic;
+        LOGGER.debug("set channel, topic: " + channel + " , " + topic);
+    });
     exec('git log -n 1 HEAD --format=oneline', function (e, stdout, stderr) {
         if (e !== null) {
             running_version = 'error getting git version';
