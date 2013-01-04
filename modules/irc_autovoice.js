@@ -7,13 +7,22 @@ var MODULE_NAME = "AUTOVOICE";
 var util = require("util");
 var bot_;
 
+function sanitizeNick(nick) {
+    return nick.replace(/[^a-zA-Z]+/, '').toLowerCase();    
+}
+
 var inSpace = function(username){
-    var users=bot_._bckspcapi.getMembers().map(function(user){return user.toLowerCase()});
-    if(users.indexOf(username.toLowerCase()) != -1){
-        return true;
-    }else{
-        return false;
-    }
+
+    var found = false;
+    bot_._bckspcapi.getMembers().some(function(value, key) {
+        if(sanitizeNick(value) == sanitizeNick(username)) {
+            found = true;
+            return true;
+        }
+    });
+
+    return found;
+
 };
 
 var setAllChans = function(){
