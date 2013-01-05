@@ -77,6 +77,7 @@ module.exports = function(cfg, log, bot){
     });
 
     bot._bckspcapi.on('start', function(){
+        LOGGER.debug('api is ready!");
         setAllChans();
     });
 
