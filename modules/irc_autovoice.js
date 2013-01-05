@@ -38,10 +38,8 @@ var setVoices = function(channel){
             return;
         }
 
-        var voicepeople = {};
-
         // Iterate all names inside the channel and check if the nick is voiced or not
-	for(var username in names) {
+        for(var username in names) {
 
             var is_voiced = (names[username].indexOf("v") != -1);
             var in_space = inSpace(username);
