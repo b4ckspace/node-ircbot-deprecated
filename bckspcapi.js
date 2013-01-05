@@ -88,7 +88,7 @@ bckspcApi.prototype.updateMembers = function(members){
     var nicks = members.map(function(member){return member.nickname});
     if(!this.isReady()){ // don't emit new members on api start
         this.lastMembers = nicks;
-        this.emit('start', nicks[i]);
+        this.emit('start', nicks);
         return;
     }
     for(var i in nicks){
