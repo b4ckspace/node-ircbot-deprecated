@@ -86,17 +86,22 @@ bckspcApi.prototype.openCount = function(){
 
 bckspcApi.prototype.updateMembers = function(members){
     var nicks = members.map(function(member){return member.nickname});
+
+    console.log(nicks, this.lastMembers, this.isReady() );
     if(!this.isReady()){ // don't emit new members on api start
         this.lastMembers = nicks;
         this.emit('start', nicks);
         return;
     }
+    console.log("Check joins");
     for(var i in nicks){
         if(this.lastMembers.indexOf(nicks[i]) == -1 ){
             console.log('emit join %s', nicks[i]);
             this.emit('join', nicks[i]);
         }
     }
+
+    console.log("Check leave");
     for(var i in this.lastMembers){
         if(nicks.indexOf(this.lastMembers[i]) == -1 ){
             console.log('emit part %s', this.lastMembers[i]);
