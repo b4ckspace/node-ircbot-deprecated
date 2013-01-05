@@ -24,9 +24,10 @@ function inSpace(username){
 };
 
 function setAllChans() {
-    bot_.topics.forEach(function(v, channel) {
+    for(var channel in bot_.topics){ 
+        console.log("Setting channel", channel);
         setVoices(channel);    
-    });    
+    }
 }
 
 var setVoices = function(channel){
