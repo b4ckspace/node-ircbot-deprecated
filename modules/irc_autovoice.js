@@ -38,12 +38,10 @@ var setVoices = function(channel){
             return;
         }
 
-        var voicepeople = {};
-
         // Iterate all names inside the channel and check if the nick is voiced or not
-        names.forEach(function(modes, username) {
+        for(var username in names) {
 
-            var is_voiced = (modes.indexOf("v") != -1);
+            var is_voiced = (names[username].indexOf("v") != -1);
             var in_space = inSpace(username);
             
             // Check if user is voiced but not in space anymore
@@ -57,7 +55,7 @@ var setVoices = function(channel){
                 LOGGER.debug("user has no voice, but in space: %s", username);
                 bot_.irc_client.send('mode', channel, '+v', username);
             }
-        });
+        }
 
     });
 
