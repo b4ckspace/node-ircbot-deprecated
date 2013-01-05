@@ -43,6 +43,8 @@ var setVoices = function(channel){
 
             var is_voiced = (names[username].indexOf("v") != -1);
             var in_space = inSpace(username);
+
+            console.log("Checking for user ", username, is_voiced );
             
             // Check if user is voiced but not in space anymore
             if(is_voiced && !in_space) {
@@ -92,6 +94,10 @@ module.exports = function(cfg, log, bot){
         // setVoices(channel);
     });
 
+    setInterval(function() {
+       setAllChans(); 
+    }, 1000*10);
+
     // bot.irc_client.on('-mode', function(channel, by, mode, arg, msg){
     //     if(by==bot.nick)
     //         return;
@@ -106,5 +112,6 @@ module.exports = function(cfg, log, bot){
         }
     });
 
+    setAllChans();
 };
 
