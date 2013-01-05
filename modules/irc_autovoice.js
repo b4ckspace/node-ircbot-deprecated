@@ -76,6 +76,10 @@ module.exports = function(cfg, log, bot){
         setVoices(channel);
     });
 
+    bot._bckspcapi.on('start', function(){
+        setAllChans();
+    });
+
     bot._bckspcapi.on('join', function(member){
         LOGGER.debug('member join: %s', member);
         setAllChans();
@@ -109,6 +113,5 @@ module.exports = function(cfg, log, bot){
         }
     });
 
-    setAllChans();
 };
 
