@@ -42,9 +42,7 @@ var setVoices = function(channel){
         // Iterate all names inside the channel and check if the nick is voiced or not
         for(var username in names) {
 
-            console.log("modes for user", names[username]);
-
-            var is_voiced = (names[username].indexOf("v") != -1);
+            var is_voiced = (names[username].indexOf("+") != -1);
             var in_space = inSpace(username);
 
             console.log("Checking for user ", username, is_voiced );
@@ -96,10 +94,6 @@ module.exports = function(cfg, log, bot){
         LOGGER.debug('+modechange: %s, %s, %s, %s, %s', channel, by, mode, arg, msg);
         // setVoices(channel);
     });
-
-    setInterval(function() {
-       setAllChans(); 
-    }, 1000*10);
 
     // bot.irc_client.on('-mode', function(channel, by, mode, arg, msg){
     //     if(by==bot.nick)
