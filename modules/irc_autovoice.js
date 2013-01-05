@@ -16,8 +16,10 @@ function inSpace(username){
 
     // Checks if the username is currently in space, and exits
     // the loop if so
+    console.log( bot_._bckspcapi.getMembers() );
     return bot_._bckspcapi.getMembers().some(function(value, key) {
         if(normalizeNick(value) == normalizeNick(username)) {
+            console.log("User", normalizeNick(value), normalizeNick(username), "is in space");
             return true;
         }
     });
@@ -25,7 +27,6 @@ function inSpace(username){
 
 function setAllChans() {
     for(var channel in bot_.topics){ 
-        console.log("Setting channel", channel);
         setVoices(channel);    
     }
 }
@@ -44,8 +45,6 @@ var setVoices = function(channel){
 
             var is_voiced = (names[username].indexOf("+") != -1);
             var in_space = inSpace(username);
-
-            console.log("Checking for user ", username, is_voiced );
             
             // Check if user is voiced but not in space anymore
             if(is_voiced && !in_space) {
