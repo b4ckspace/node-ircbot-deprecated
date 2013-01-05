@@ -16,10 +16,8 @@ function inSpace(username){
 
     // Checks if the username is currently in space, and exits
     // the loop if so
-    console.log( bot_._bckspcapi.getMembers() );
     return bot_._bckspcapi.getMembers().some(function(value, key) {
         if(normalizeNick(value) == normalizeNick(username)) {
-            console.log("User", normalizeNick(value), normalizeNick(username), "is in space");
             return true;
         }
     });
