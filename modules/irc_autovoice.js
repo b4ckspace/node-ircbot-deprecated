@@ -25,19 +25,14 @@ function inSpace(username){
 
 function setAllChans() {
     for(var channel in bot_.topics){ 
-        setVoices('#backspace');    
+        setVoices(channel);    
         break;
     }
 }
 
 var setVoices = function(channel){
 
-    bot_.irc_client.once('names', function(chname, names){
-
-        if(channel != chname){
-            LOGGER.debug("setVoice channel!=nchannel %s != %s", channel, chname);
-            return;
-        }
+    bot_.irc_client.once('names'+channel, function(names){
 
         // Iterate all names inside the channel and check if the nick is voiced or not
         for(var username in names) {

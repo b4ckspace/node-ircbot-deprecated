@@ -27,7 +27,7 @@
         "bot"
     ],
     "dependencies" : {
-        "irc":       "0.3.x",
+        "irc":       "https://github.com/ydnax/node-irc/tarball/extended_names",
         "mpdsocket": "0.1.x",
         "nstore":    "0.5.x",
         "log4js":    "0.5.x",

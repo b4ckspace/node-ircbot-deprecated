@@ -72,11 +72,7 @@ FILTERS.karma = function(message, sender, to){
         this.reply(sender, to, 'du kannst nur einmal pro minute karma verteilen.', true);
         return;
     }
-    this.irc_client.once('names', function(channel, names){
-        if(channel != to){
-            LOGGER.warn('channel(%s) != to(%s)', channel, to);
-            return;
-        }
+    this.irc_client.once('names'+to, function(names){
         if(names[nick] != undefined){
             addKarma(nick);
             LOGGER.info('%s gave %s karma (%s)', sender, nick, channel);
