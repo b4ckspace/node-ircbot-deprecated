@@ -25,8 +25,7 @@ function inSpace(username){
 
 function setAllChans() {
     for(var channel in bot_.topics){ 
-        setVoices(channel);    
-        break;
+        setVoices(channel);
     }
 }
 
