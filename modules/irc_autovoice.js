@@ -30,7 +30,9 @@ function setAllChans() {
 }
 
 var setVoices = function(channel){
-
+    if(!bot_._bckspcapi.isReady()){
+        return
+    }
     bot_.irc_client.once('names'+channel, function(names){
 
         // Iterate all names inside the channel and check if the nick is voiced or not
