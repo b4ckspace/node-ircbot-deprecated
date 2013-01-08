@@ -75,14 +75,14 @@ FILTERS.karma = function(message, sender, to){
     this.irc_client.once('names'+to, function(names){
         if(names[nick] != undefined){
             addKarma(nick);
-            LOGGER.info('%s gave %s karma (%s)', sender, nick, channel);
+            LOGGER.info('%s gave %s karma (%s)', sender, nick, to);
             karma_timeouts[sender] = true;
             setTimeout(function(){
                 karma_timeouts[sender] = undefined;
                 LOGGER.info('timeout for user %s cleared', sender);
             },karmaWait);
         }else{
-            LOGGER.warn('%s tried to give karma to %s (%s). but user is not in channel', sender, nick, channel);
+            LOGGER.warn('%s tried to give karma to %s (%s). but user is not in channel', sender, nick, to);
         }
     });
     this.irc_client.send('names', to);
