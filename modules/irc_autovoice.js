@@ -6,10 +6,11 @@ var MODULE_NAME = "AUTOVOICE";
 
 var util = require("util");
 var bot_;
+var sanitize_regex = new RegExp('[^a-zA-Z]', 'g');
 
 // Normalize nickname for better matching
 function normalizeNick(nick) {
-    return nick.replace(/[^a-zA-Z]+/, '').toLowerCase();    
+    return nick.replace(sanitize_regex, '').toLowerCase();    
 }
 
 function inSpace(username){
