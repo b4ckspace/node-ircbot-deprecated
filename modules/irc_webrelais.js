@@ -25,6 +25,7 @@ var alarm_blocked = false;
         return;
     }
     
+    var args  = Array.prototype.slice.call(arguments);
     var message = "irc: " + args.slice(2).join(' ');
 
     var options     = url.parse('http://api.ledboard.bckspc.de/send_text');
@@ -36,6 +37,7 @@ var alarm_blocked = false;
 
     var http_s = options.protocol=='https:' ? https : http;
 
+    LOGGER.info("sending message %s to api", message);
     // Set up the request
     var req = http_s.request(options, function(res){});
 
