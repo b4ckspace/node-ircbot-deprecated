@@ -11,6 +11,7 @@ var alarmWait   = 60*1000;
 
 var http = require('http');
 var https = require('https');
+var url    = require('url');
 
 var alarm_blocked = false;
 (COMMANDS['!alarm'] = function(sender, to) {
