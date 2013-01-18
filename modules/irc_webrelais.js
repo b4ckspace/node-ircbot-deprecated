@@ -9,6 +9,9 @@ var webrelaisApi= require('../webrelais.js');
 var webrelais   = new webrelaisApi.Client("https://webrelais.bckspc.de:443");
 var alarmWait   = 60*1000;
 
+var http = require('http');
+var https = require('https');
+
 var alarm_blocked = false;
 (COMMANDS['!alarm'] = function(sender, to) {
     if(!this.isChannel(sender, to)){
@@ -21,6 +24,21 @@ var alarm_blocked = false;
         LOGGER.info("alarm not ready %s %s", sender, to);
         return;
     }
+    
+    var message = "irc: " + args.slice(2).join(' ');
+
+    var options     = url.parse('http://api.ledboard.bckspc.de/send_text');
+    options.method  = 'GET';
+    options.headers = {'Content-length': 0};
+    options.query = {
+        'message': message
+    };
+
+    var http_s = options.protocol=='https:' ? https : http;
+
+    // Set up the request
+    var req = http_s.request(options, function(res){});
+
     alarm_blocked=true;
     setTimeout(function(){
         alarm_blocked = false;
