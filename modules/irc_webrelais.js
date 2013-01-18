@@ -29,18 +29,16 @@ var alarm_blocked = false;
     var args  = Array.prototype.slice.call(arguments);
     var message = "irc: " + args.slice(2).join(' ');
 
-    var options     = url.parse('http://api.ledboard.bckspc.de/send_text');
+    var options     = url.parse('http://api.ledboard.bckspc.de/send_text?message='+message);
     options.method  = 'GET';
     options.headers = {'Content-length': 0};
-    options.query = {
-        'message': message
-    };
 
     var http_s = options.protocol=='https:' ? https : http;
 
     LOGGER.info("sending message %s to api", message);
     // Set up the request
     var req = http_s.request(options, function(res){});
+    req.end();
 
     alarm_blocked=true;
     setTimeout(function(){
