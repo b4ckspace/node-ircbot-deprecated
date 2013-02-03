@@ -9,10 +9,10 @@ var bot_;
 
 // Normalize nickname for better matching
 function normalizeNick(nick) {
-    return nick.replace(/[^a-zA-Z]+/, '').toLowerCase();    
+    return nick.replace(/[^a-zA-Z]+/, '').toLowerCase();
 }
 
-function inSpace(username){
+function inSpace(username) {
 
     // Checks if the username is currently in space, and exits
     // the loop if so
@@ -24,10 +24,30 @@ function inSpace(username){
 };
 
 function setAllChans() {
-    for(var channel in bot_.topics){ 
+    for(var channel in bot_.topics){
         setVoices(channel);
     }
 }
+
+var buffer = {};
+var buffered = false;
+var bufferVoice = function(channel, user, mode) {
+    buffer[channel+user] = {    channel : channel,
+                                user : user,
+                                mode : mode };
+    if(!buffered){
+        buffered = true;
+        setTimeout(sendBuffer, 100);
+    }
+};
+var sendBuffer = function(){
+    for(var k in buffer){
+        var info = buffer[k];
+        bot_.irc_client.send('mode', info.channel, info.mode, info.user)
+    }
+    buffer = {};
+    buffered = false;
+};
 
 var setVoices = function(channel){
     if(!bot_._bckspcapi.isReady()){
@@ -40,17 +60,19 @@ var setVoices = function(channel){
 
             var is_voiced = (names[username].indexOf("+") != -1);
             var in_space = inSpace(username);
-            
+
             // Check if user is voiced but not in space anymore
             if(is_voiced && !in_space) {
                 LOGGER.debug("user has voice, but not in space: %s", username);
-                bot_.irc_client.send('mode', channel, '-v', username);
+                bufferVoice(channel, username, '-v');
+                // bot_.irc_client.send('mode', channel, '-v', username);
             }
 
             // Check if user is not voiced, but in space
             if(!is_voiced && in_space) {
                 LOGGER.debug("user has no voice, but in space: %s", username);
-                bot_.irc_client.send('mode', channel, '+v', username);
+                bufferVoice(channel, username, '+v');
+                // bot_.irc_client.send('mode', channel, '+v', username);
             }
         }
 
