@@ -15,8 +15,7 @@ var fetchTimeout = 5 * 60 * 1000;
 
 var updateWeather = function(){
     LOGGER.debug("fetch new data, url: %s%s", weatherbase, wid);
-    var parser = new feedparser();
-    parser.parseUrl(weatherbase + wid, {}, function(error, meta, arts){
+    feedparser.parseUrl(weatherbase + wid, {}, function(error, meta, arts){
         if(error){
             LOGGER.error(error);
             return;
@@ -24,7 +23,7 @@ var updateWeather = function(){
         var today = arts[0]['yweather:condition']['@'];
         var todayinfo = today['text'] + " " + today['temp'] + '°C';
         var forecast = arts[0]['yweather:forecast'][1]['@'];
-        var forecastinfo =  'tomorrow (' + forecast['day'] + "): " + forecast['low'] 
+        var forecastinfo =  'tomorrow (' + forecast['day'] + "): " + forecast['low']
                             + "-" + forecast['high'] + "°C " + forecast['text'];
         weatherdata = todayinfo + ' ' + forecastinfo;
     });
