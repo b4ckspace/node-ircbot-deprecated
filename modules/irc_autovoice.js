@@ -130,6 +130,6 @@ module.exports = function(cfg, log, bot){
             setVoices(channels[i]);
         }
     });
-    return {commands:[]}:
+    return {commands:[]};
 };
 
