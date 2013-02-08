@@ -68,9 +68,8 @@ var IrcBot = function(){
 IrcBot.prototype.loadModules = function(){
     var that = this;
     config.modules.forEach(function(modname){
-        console.log("loading %s", modname)
+        logger.info("loading %s", modname);
         var hooks = require('./modules/irc_' + modname + '.js')(config, log4js, that);
-        console.log(util.inspect(hooks))
         that.installHooks(hooks);
     });
 };
