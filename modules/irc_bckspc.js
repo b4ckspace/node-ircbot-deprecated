@@ -16,7 +16,7 @@ var spaceApi    = new bckspcApi();
         message = "closed";
     }
     this.reply(sender, to, message);
-    
+
 }).helptext = "get the space status";
 
 (COMMANDS['!inspace'] = function(sender, to, command){
@@ -36,9 +36,6 @@ var spaceApi    = new bckspcApi();
 module.exports = function(cfg, log, bot){
     LOGGER = log.getLogger(MODULE_NAME);
     CONFIG = cfg;
-    for(key in COMMANDS){
-        bot.commands[key] = COMMANDS[key];
-    }
     for(key in FILTERS){
         bot.filters[key] = FILTERS[key];
     }
@@ -53,6 +50,7 @@ module.exports = function(cfg, log, bot){
         }
     });
     bot._bckspcapi=spaceApi;
+    return {commands:COMMANDS};
 };
 
 

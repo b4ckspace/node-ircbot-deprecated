@@ -92,12 +92,10 @@ FILTERS.karma = function(message, sender, to){
 module.exports = function(cfg, log, bot){
     LOGGER = log.getLogger(MODULE_NAME);
     CONFIG = cfg;
-    for(key in COMMANDS){
-        bot.commands[key] = COMMANDS[key];
-    }
     for(key in FILTERS){
         bot.filters[key] = FILTERS[key];
     }
+    return {commands:COMMANDS};
 };
 
 var addKarma = function(user){

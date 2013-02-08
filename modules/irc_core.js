@@ -7,7 +7,7 @@ var CONFIG;
 var MODULE_NAME = "CORE";
 
 var util        = require('util');
-var exec        = require('child_process').exec; 
+var exec        = require('child_process').exec;
 var running_version = "unknown";
 var score_cooldown = 2 * 1000;
 
@@ -39,12 +39,13 @@ var score_cooldown = 2 * 1000;
         this.reply(sender, to, "command not found");
         return;
     }
-    var text;
-    if(text = this.commands[command].helptext){
+    var text = this.commands[command].map(function(command){
+        return command.helptext;
+    }).join('; ');
+    if(text  ){
         this.reply(sender, to, command + ": " + text);
     }else{
         this.reply(sender, to, "no helptext found");
-        return;
     }
 }).helptext = "get more help for a command";
 
@@ -70,9 +71,6 @@ BLACKLISTS.flood = function(message, sender, to){
 module.exports = function(cfg, log, bot){
     LOGGER = log.getLogger(MODULE_NAME);
     CONFIG = cfg;
-    for(key in COMMANDS){
-        bot.commands[key] = COMMANDS[key];
-    }
     for(key in FILTERS){
         bot.filters[key] = FILTERS[key];
     }
@@ -93,6 +91,7 @@ module.exports = function(cfg, log, bot){
             LOGGER.info("version: ", running_version);
         }
     });
+    return {commands:COMMANDS};
 };
 
 

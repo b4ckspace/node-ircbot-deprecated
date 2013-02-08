@@ -11,7 +11,6 @@ exports.ircpass     = env['irc_pass']   || undefined;
 exports.secure      = env['irc_ssl']    == "true";
 exports.ignoreSsl   = env['ssl_ignore'] == "true";
 exports.channels    = (env['channels']  && env['channels'].split(','))||['#backspace'];
-exports.disable_mpd = env['nompd']      == "true";
 
 exports.github_user     = env['github_user']    ||'backspace-ircbot';
 exports.github_token    = env['github_token']   ||'your token here';
@@ -19,3 +18,5 @@ exports.github_repouser = env['github_repouser']||'ydnax';
 exports.github_repo     = env['github_repo']    ||'test-repo';
 
 exports.webmessage_port = env['webmessage_port'] || '8042';
+
+exports.modules = ['core', 'plenking', 'karma', 'bckspc', 'webrelais', 'mpd', 'github', 'weather', 'webrelais'];

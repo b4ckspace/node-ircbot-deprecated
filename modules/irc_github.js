@@ -24,10 +24,10 @@ var report_locked = false;
     var args  = Array.prototype.slice.call(arguments);
     var title = "irc: " + args.slice(2).join(' ');
     var text  = "irc bugreport by " + sender;
-    var data  = { user   : CONFIG.github_repouser, 
-                  repo   : CONFIG.github_repo, 
-                  title  : title, 
-                  body   : text, 
+    var data  = { user   : CONFIG.github_repouser,
+                  repo   : CONFIG.github_repo,
+                  title  : title,
+                  body   : text,
                   labels : ['irc']};
     LOGGER.info("create issue user: %s channel: %s, data: %s", sender, to, JSON.stringify(data));
     github.issues.create(data, function(error, response){
@@ -45,9 +45,6 @@ var report_locked = false;
 module.exports = function(cfg, log, bot){
     LOGGER = log.getLogger(MODULE_NAME);
     CONFIG = cfg;
-    for(key in COMMANDS){
-        bot.commands[key] = COMMANDS[key];
-    }
     for(key in FILTERS){
         bot.filters[key] = FILTERS[key];
     }
@@ -57,4 +54,5 @@ module.exports = function(cfg, log, bot){
         username: CONFIG.github_user,
         token: CONFIG.github_token
     });
+    return {commands:COMMANDS};
 };

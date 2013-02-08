@@ -19,8 +19,6 @@ var ircpass     = config.ircpass;
 var secure      = config.secure;
 var ignoreSsl   = config.ignoreSsl;
 var channels    = config.channels;
-var disable_mpd = config.disable_mpd;
-
 
 /*REQUIRES*/
 var irc         = require('irc');
@@ -60,23 +58,30 @@ var IrcBot = function(){
     this.irc_client .addListener('error', function(message){
         logger.error(JSON.stringify(message));
     });
-    this.commands   = {}; 
+    this.commands   = {};
     this.filters    = {};
     this.blacklists = {};
     this.channelwarn = {};
-    //this.irc_client = ircclient;
-    require('./modules/irc_core.js')(config, log4js, this);
-    require('./modules/irc_plenking.js')(config, log4js, this);
-    require('./modules/irc_karma.js')(config, log4js, this);
-    require('./modules/irc_bckspc.js')(config, log4js, this);
-    require('./modules/irc_webrelais.js')(config, log4js, this);
-    if(!disable_mpd)
-        require('./modules/irc_mpd.js')(config, log4js, this);
+    this.loadModules();
+};
 
-    require('./modules/irc_github.js')(config, log4js, this);
-    require('./modules/irc_weather.js')(config, log4js, this);
-    require('./modules/irc_autovoice.js')(config, log4js, this);
-    //require('./modules/irc_webMessage.js')(config, log4js, this);
+IrcBot.prototype.loadModules = function(){
+    var that = this;
+    config.modules.forEach(function(modname){
+        console.log("loading %s", modname)
+        var hooks = require('./modules/irc_' + modname + '.js')(config, log4js, that);
+        console.log(util.inspect(hooks))
+        that.installHooks(hooks);
+    });
+};
+
+IrcBot.prototype.installHooks = function(hooks){
+    var that = this;
+    Object.keys(hooks.commands).forEach(function(command){
+        if(!that.commands[command])
+            that.commands[command]=[];
+        that.commands[command].push(hooks.commands[command])
+    })
 };
 
 IrcBot.prototype.sendToWho = function(sender, to){
@@ -113,11 +118,14 @@ IrcBot.prototype.reply = function(sender, to, message, nowarn){
 IrcBot.prototype.messageDispatcher = function(message, sender, to){
     var args    = message.split(' ');
     var command = args[0];
-    var fun;
-    if(fun = this.commands[command]){
+    var funs;
+    if(funs = this.commands[command]){
         if(this.isBlacklisted(message, sender, to))
             return;
-        fun.apply(this, [sender, to].concat(args.slice(1)) );
+        var that = this;
+        funs.forEach(function(fun){
+            fun.apply(that, [sender, to].concat(args.slice(1)) );
+        })
     }
 };
 

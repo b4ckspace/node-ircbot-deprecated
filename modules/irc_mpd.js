@@ -120,38 +120,15 @@ var mpd;
     }
 }).helptext = "get the path to the current playing file";
 
-module.exports = function(cfg, logger, bot){
-    LOGGER = logger.getLogger("mpd");
-    config=cfg;
-    /* MPD SETUP*/
-    var mpdInit = function(){
-        LOGGER.debug("reconnect");
-        mpd = new mpdSocket(mpd_host, mpd_port);
-        mpd.on('close', function(){
-            LOGGER.debug("close");
-            mpdInit();
-        });
-        mpd.on('error', function(text){
-            LOGGER.error(text);
-            setTimeout(mpdInit, 5000);
-        });
-    };
-    mpdInit();
-    for(key in COMMANDS){
-        bot.COMMANDS[key] = COMMANDS[key];
-    }
-};
 
 module.exports = function(cfg, log, bot){
     LOGGER = log.getLogger(MODULE_NAME);
     CONFIG = cfg;
-    for(key in COMMANDS){
-        bot.commands[key] = COMMANDS[key];
-    }
     for(key in FILTERS){
         bot.filters[key] = FILTERS[key];
     }
     mpdInit();
+    return {commands:COMMANDS};
 };
 
 
