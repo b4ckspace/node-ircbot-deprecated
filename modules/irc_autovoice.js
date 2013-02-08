@@ -93,7 +93,7 @@ module.exports = function(cfg, log, bot){
         setVoices(channel);
     });
 
-    bot._bckspcapi.on('start', function(){
+    bot._bckspcapi.on('ready', function(){
         LOGGER.debug('api is ready!');
         setAllChans();
     });

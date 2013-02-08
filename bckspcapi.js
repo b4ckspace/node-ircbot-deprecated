@@ -62,7 +62,7 @@ bckspcApi.prototype.updateSpaceStatus = function(){
                 that.emit('closed');
             }
 
-            
+
         });
     }).on('error', function(e) {
         console.log("Got http status error error: " + e.message);
@@ -89,7 +89,6 @@ bckspcApi.prototype.updateMembers = function(members){
 
     if(!this.isReady()){ // don't emit new members on api start
         this.lastMembers = nicks;
-        this.emit('start', nicks);
         return;
     }
 
