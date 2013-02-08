@@ -66,6 +66,7 @@ var IrcBot = function(){
 };
 
 IrcBot.prototype.loadModules = function(){
+    this.loaded_modules = config.modules;
     var that = this;
     config.modules.forEach(function(modname){
         logger.info("loading %s", modname);

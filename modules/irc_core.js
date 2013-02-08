@@ -56,6 +56,9 @@ var score_cooldown = 2 * 1000;
 (COMMANDS['!help'] = function(sender, to, command){
     this.reply(sender, to, '!commands, !more <command> or visit https://github.com/b4ckspace/ircbot');
 }).helptext = "pong";
+(COMMANDS['!modules'] = function(sender, to, command){
+    this.reply(sender, to, this.loaded_modules.join(', '))
+}).helptext = "show all loaded modules";
 
 BLACKLISTS.flood = function(message, sender, to){
     if(dropMessage(message, sender, to)){
