@@ -19,4 +19,4 @@ exports.github_repo     = env['github_repo']    ||'test-repo';
 
 exports.webmessage_port = env['webmessage_port'] || '8042';
 
-exports.modules = ['core', 'plenking', 'karma', 'bckspc', 'webrelais', 'mpd', 'github', 'weather', 'webrelais'];
+exports.modules = ['core', 'plenking', 'karma', 'bckspc', 'webrelais', 'mpd', 'github', 'weather', 'webrelais', 'autovoice'];
