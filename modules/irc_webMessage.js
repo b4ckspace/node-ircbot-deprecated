@@ -74,4 +74,5 @@ module.exports = function(cfg, log, bot){
     LOGGER = log.getLogger(MODULE_NAME);
     CONFIG = cfg;
     initServer(bot);
+    return {commands:[]}
 };

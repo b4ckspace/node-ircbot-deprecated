@@ -22,4 +22,4 @@ exports.raven_url = env['raven_url'] || '';
 exports.webmessage_port = env['webmessage_port'] || '8042';
 exports.webmessage_pass = 'verysecret!!!!1111';
 
-exports.modules = ['sentry', 'core', 'plenking', 'karma', 'bckspc', 'webrelais', 'mpd', 'github', 'weather', 'autovoice', 'webmessage'];
+exports.modules = ['sentry', 'core', 'plenking', 'karma', 'bckspc', 'webrelais', 'mpd', 'github', 'weather', 'autovoice', 'webMessage'];
