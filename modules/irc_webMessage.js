@@ -7,7 +7,7 @@ var MODULE_NAME = "webMessage";
 var http = require('http');
 var util = require('util');
 
-var initServer = function(nbot){
+var initServer = function(nbot, cfg){
     var bot = nbot;
     var server = http.createServer();
     server.on('request', function(request, response){
@@ -42,6 +42,11 @@ var initServer = function(nbot){
                 response.end();
                 return;
             }
+            if(data.passcode != cfg.webmessage_pass){
+                response.writeHead(403);
+                response.write(JSON.stringify({error:true}));
+                return;
+            }
             if( (!data.message) || (data.message == '') || (!data.to) || (data.to == '') ){
                 LOGGER.warn('empty message or to field');
                 response.writeHead(400);
@@ -50,8 +55,8 @@ var initServer = function(nbot){
                 return;
             }
             bot.irc_client.say(data.to, data.message);
-            LOGGER.info('sending message "%s" to %s. useragent: %s', 
-                                    data.message, data.to, 
+            LOGGER.info('sending message "%s" to %s. useragent: %s',
+                                    data.message, data.to,
                                     request.headers['user-agent']);
             response.writeHead(200);
             response.write(JSON.stringify({error:false}));

@@ -20,5 +20,6 @@ exports.github_repo     = env['github_repo']    ||'test-repo';
 exports.raven_url = env['raven_url'] || '';
 
 exports.webmessage_port = env['webmessage_port'] || '8042';
+exports.webmessage_pass = 'verysecret!!!!1111';
 
-exports.modules = ['sentry', 'core', 'plenking', 'karma', 'bckspc', 'webrelais', 'mpd', 'github', 'weather', 'autovoice'];
+exports.modules = ['sentry', 'core', 'plenking', 'karma', 'bckspc', 'webrelais', 'mpd', 'github', 'weather', 'autovoice', 'webmessage'];
