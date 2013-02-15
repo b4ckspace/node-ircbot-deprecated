@@ -1,6 +1,6 @@
 {
     "name": "ircbot",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "author": "xandy <xandy@hackerspace-bamberg.de>",
     "description": "ircbot for the backspace irc channel",
     "contributors": [
@@ -11,7 +11,7 @@
         {
             "name": "zaphod1984",
             "email": "zaphod84@gmx.de"
-        }, 
+        },
         {
             "name": "krisha",
             "email": "krisha@chrisi.de"
@@ -28,6 +28,7 @@
     ],
     "dependencies" : {
         "irc":       "https://github.com/ydnax/node-irc/tarball/extended_names",
+        "raven":     "0.4.x",
         "mpdsocket": "0.1.x",
         "nstore":    "0.5.x",
         "log4js":    "0.5.x",
