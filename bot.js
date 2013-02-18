@@ -33,13 +33,10 @@ log4js.configure({
     ]
 });
 
-
-var logger = log4js.getLogger("CORE");
-logger.info("STARTUP");
-
-
 var IrcBot = function(){
     var that = this;
+    this._log_factory = log4js;
+    this._log_factory.getLogger("INIT").info("starting")
     this.irc_client = new irc.Client( irc_server, nick, {
         'channels'      : channels,
         'userName'      : username,
@@ -50,13 +47,13 @@ var IrcBot = function(){
         'certExpired'   : ignoreSsl,
         'password'      : ircpass,
     });
-    this.irc_client .addListener('message', function (from, to, message) {
+    this.irc_client.addListener('message', function (from, to, message) {
         if((from!=nick) && (!that.contentFilter(message, from, to)) ){
             that.messageDispatcher(message, from, to);
         }
     });
-    this.irc_client .addListener('error', function(message){
-        logger.error(JSON.stringify(message));
+    this.irc_client.addListener('error', function(message){
+        that._log_factory.getLogger("IRC").error(JSON.stringify(message));
     });
     this.commands   = {};
     this.filters    = {};
@@ -69,8 +66,8 @@ IrcBot.prototype.loadModules = function(){
     this.loaded_modules = config.modules;
     var that = this;
     config.modules.forEach(function(modname){
-        logger.info("loading %s", modname);
-        var hooks = require('./modules/irc_' + modname + '.js')(config, log4js, that);
+        that._log_factory.getLogger("INIT").info("loading module %s", modname);
+        var hooks = require('./modules/irc_' + modname + '.js')(config, that._log_factory, that);
         that.installHooks(hooks);
     });
 };
@@ -95,6 +92,7 @@ IrcBot.prototype.isChannel = function(sender, to){
 IrcBot.prototype.reply = function(sender, to, message, nowarn){
     var channelwarnTimeout = 5*60*1000;
     var warnstart = 5;
+    var logger = this._log_factory.getLogger("IRC");
     if(this.isChannel(sender, to)){
         message = sender + ": " + message;
         if(!nowarn){
