@@ -59,6 +59,7 @@ var IrcBot = function(){
     this.filters    = {};
     this.blacklists = {};
     this.channelwarn = {};
+    this.nick = nick;
     this.loadModules();
 };
 

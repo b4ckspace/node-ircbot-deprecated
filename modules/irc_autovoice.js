@@ -55,6 +55,10 @@ var setVoices = function(channel){
         return
     }
     bot_.irc_client.once('names'+channel, function(names){
+        if(names[bot__.nick].indexOf('@')==-1 ){
+            LOGGER.info("can't give voice in %s, missing op", channel);
+            return;
+        }
 
         // Iterate all names inside the channel and check if the nick is voiced or not
         for(var username in names) {
