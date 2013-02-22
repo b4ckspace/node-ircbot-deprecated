@@ -55,7 +55,7 @@ var setVoices = function(channel){
         return
     }
     bot_.irc_client.once('names'+channel, function(names){
-        if(names[bot__.nick].indexOf('@')==-1 ){
+        if(names[bot_.nick].indexOf('@')==-1 ){
             LOGGER.info("can't give voice in %s, missing op", channel);
             return;
         }
