@@ -33,7 +33,7 @@
         "nstore":    "0.5.x",
         "log4js":    "0.5.x",
         "github":    "0.1.x",
-        "sprintf"    "0.1.x"
+        "sprintf":    "0.1.x"
     },
     "engine": {
         "node": ">=0.6"
