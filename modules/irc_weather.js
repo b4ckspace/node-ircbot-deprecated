@@ -5,34 +5,50 @@ var CONFIG;
 
 var MODULE_NAME = "WEATHER";
 
-var util=require('util');
-var feedparser = require('feedparser');
+var util = require('util');
+var http = require('http');
 
-var wid = '636766';
-var weatherbase = 'http://weather.yahooapis.com/forecastrss?u=c&w=';
-var weatherdata = undefined;
+var town = 'Bamberg,Germany';
+var weatherbase = 'http://api.openweathermap.org/data/2.1/find/name?q=';
+var currentweather = undefined;
 var fetchTimeout = 5 * 60 * 1000;
 
 var updateWeather = function(){
-    LOGGER.debug("fetch new data, url: %s%s", weatherbase, wid);
-    feedparser.parseUrl(weatherbase + wid, {}, function(error, meta, arts){
-        if(error){
-            LOGGER.error(error);
-            return;
-        }
-        var today = arts[0]['yweather:condition']['@'];
-        var todayinfo = today['text'] + " " + today['temp'] + '°C';
-        var forecast = arts[0]['yweather:forecast'][1]['@'];
-        var forecastinfo =  'tomorrow (' + forecast['day'] + "): " + forecast['low']
-                            + "-" + forecast['high'] + "°C " + forecast['text'];
-        weatherdata = todayinfo + ' ' + forecastinfo;
+    var url = weatherbase + town;
+    LOGGER.debug("fetch new data, url: %s", url);
+    http.get(url, function(res){
+        var resString = '';
+
+        res.setEncoding('utf8');
+
+        res.on( 'data', function( data ) {
+            resString += data;
+        } );
+        res.on('end', function(){
+            var status;
+            try{
+                status = JSON.parse(resString);
+            }catch(e){
+                LOGGER.error("json parse error: " + e.message);
+                return;
+            }
+            var temp = status.list[0].main.temp - 273.15; //temp is in kelvin
+            var weather = status.list[0].weather[0].main;
+            currentweather = weather + "(" + temp + "°C)";
+        });
+    }).on('error', function(e) {
+        LOGGER.error("Got http status error error: " + e.message);
     });
     setTimeout(updateWeather, fetchTimeout);
 };
 
 
 (COMMANDS['!weather'] = function(sender, to, user){
-    this.reply(sender, to, weatherdata);
+    if(currentweather){
+        this.reply(sender, to, currentweather);
+        return;
+    }
+    this.reply(sender, to, "no weather data fetched yet.");
 }).helptext = "get current weather data.";
 
 COMMANDS['!wetter'] = COMMANDS['!weather'];
