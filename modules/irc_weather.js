@@ -7,6 +7,7 @@ var MODULE_NAME = "WEATHER";
 
 var util = require('util');
 var http = require('http');
+var sprintf = require('sprintf').sprintf;
 
 var town = 'Bamberg,Germany';
 var weatherbase = 'http://api.openweathermap.org/data/2.1/find/name?q=';
@@ -34,7 +35,7 @@ var updateWeather = function(){
             }
             var temp = status.list[0].main.temp - 273.15; //temp is in kelvin
             var weather = status.list[0].weather[0].main;
-            currentweather = weather + "(" + temp + "°C)";
+            currentweather = sprintf("%s (%.2f°C)", weather, temp);
         });
     }).on('error', function(e) {
         LOGGER.error("Got http status error error: " + e.message);
