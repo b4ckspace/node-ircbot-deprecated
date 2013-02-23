@@ -42,7 +42,6 @@ module.exports = function(cfg, log, bot){
     bot.irc_client.addListener('topic', function (channel, topic, nick, message){
         topics[channel] = topic;
         setTopic(channel, bot.irc_client);
-        LOGGER.debug("set channel, topic: " + channel + " , " + topic);
     });
     spaceApi.on('isopen', function(open){
         for(var channel in topics){
@@ -72,6 +71,7 @@ var setTopic = function(channel, connection){
         return;
     var newTopic = topics[channel].replace(topicExpr, message);
     if(newTopic != topics[channel]){
+        LOGGER.debug("set channel, topic: " + channel + " , " + topic);
         connection.send("topic", channel, newTopic);
     }
 };
