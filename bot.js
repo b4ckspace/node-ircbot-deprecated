@@ -115,7 +115,7 @@ IrcBot.prototype.reply = function(sender, to, message, nowarn){
 };
 
 IrcBot.prototype.messageDispatcher = function(message, sender, to){
-    var args    = message.split(' ');
+    var args    = message.split(/\s+/);
     var command = args[0];
     var funs;
     if(funs = this.commands[command]){
