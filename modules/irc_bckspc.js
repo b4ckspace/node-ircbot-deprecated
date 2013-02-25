@@ -71,7 +71,7 @@ var setTopic = function(channel, connection){
         return;
     var newTopic = topics[channel].replace(topicExpr, message);
     if(newTopic != topics[channel]){
-        LOGGER.debug("set channel, topic: " + channel + " , " + topic);
+        LOGGER.debug("set channel, topic: " + channel + " , " + newTopic);
         connection.send("topic", channel, newTopic);
     }
 };
