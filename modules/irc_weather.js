@@ -68,6 +68,8 @@ var fetchWeatherByName = function(term, callback){
         }
         return
     }
+    if(term.match(/b[a4]ckspace/i))
+        term = "Bamberg, Germany";
     var that = this;
     fetchWeatherByName(term, function(res){
         that.reply(sender, to, res);
