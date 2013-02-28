@@ -93,6 +93,7 @@ IrcBot.prototype.isChannel = function(sender, to){
 IrcBot.prototype.reply = function(sender, to, message, nowarn){
     var channelwarnTimeout = 5*60*1000;
     var warnstart = 5;
+    var replyquery = 6;
     var logger = this._log_factory.getLogger("IRC");
     if(this.isChannel(sender, to)){
         message = sender + ": " + message;
@@ -108,6 +109,9 @@ IrcBot.prototype.reply = function(sender, to, message, nowarn){
             if(this.channelwarn[to]>=warnstart){
                 logger.info("channelwarn > 5 %s", to);
                 message = message + " tip: you can send most commands via query.";
+            }
+            if(this.channelwarn[to]>=replyquery){
+                to = sender;
             }
         }
     }
