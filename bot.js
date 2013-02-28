@@ -91,9 +91,9 @@ IrcBot.prototype.isChannel = function(sender, to){
 };
 
 IrcBot.prototype.reply = function(sender, to, message, nowarn){
-    var channelwarnTimeout = 5*60*1000;
-    var warnstart = 5;
-    var replyquery = 6;
+    var channelwarnTimeout = 3*60*1000;
+    var warnstart = 3;
+    var replyquery = 4;
     var logger = this._log_factory.getLogger("IRC");
     if(this.isChannel(sender, to)){
         message = sender + ": " + message;
