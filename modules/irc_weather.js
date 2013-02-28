@@ -15,18 +15,14 @@ var currentweather = undefined;
 var fetchTimeout = 5 * 60 * 1000;
 
 var updateWeather = function(){
-    fetchWeatherByName("Bamberg", "Germany", function(res){
+    fetchWeatherByName("Bamberg, Germany", function(res){
         currentweather=res;
     });
     setTimeout(updateWeather, fetchTimeout);
 };
 
-var fetchWeatherByName = function(town, country, callback){
-    if(!town)
-        town="Bamberg";
-    if(!country)
-        country="Germany"
-    var url = weatherbase + town + "," + country;
+var fetchWeatherByName = function(term, callback){
+    var url = weatherbase + encodeURIComponent(term);
     LOGGER.debug("fetch new data. url: %s", url);
     http.get(url, function(res){
         var resString = '';
@@ -39,11 +35,11 @@ var fetchWeatherByName = function(town, country, callback){
             try{
                 status = JSON.parse(resString);
             }catch(e){
-                LOGGER.error("json parse error: " + e.message);
+                LOGGER.error("json parse error: " + e.message + " dta: " + JSON.stringify(resString));
                 return;
             }
             if(status.message){
-                LOGGER.warn("api error: %s for town, country: %s, %s", status.message, town, country);
+                LOGGER.warn("api error: %s for search '%s'", status.message, term);
                 callback('error: "' + status.message + '"');
                 return;
             }
@@ -52,7 +48,7 @@ var fetchWeatherByName = function(town, country, callback){
             var link = status.list[0].url;
             var realtown = status.list[0].name;
             var realcountry = status.list[0].sys.country;
-            var ret = sprintf("weather for %s, %s: %s (%.2f°C) more: %s",realtown, realcountry, weather, temp, link);
+            var ret = sprintf("weather for %s, %s: %s (%.2f°C) more: %s", realtown, realcountry, weather, temp, link);
             callback(ret);
         });
     }).on('error', function(e) {
@@ -72,23 +68,8 @@ var fetchWeatherByName = function(town, country, callback){
         }
         return
     }
-    var matches = term.split(',');
-    var town = matches[0];
-    var country=matches[1];
-    if(!country){
-        country="Germany";
-    }else{
-        country = country.match(/\w+[\s\w+]*\w+/)[0];
-        if(!country)
-            country="Germany";
-    }
-    if(!town.match(/\w+[\s\w+]*\w+/)){
-        this.reply(sender, to, "no valid town given.");
-        return
-    }
-    town=town.match(/\w+[\s\w+]*\w+/)[0];
     var that = this;
-    fetchWeatherByName(town, country, function(res){
+    fetchWeatherByName(term, function(res){
         that.reply(sender, to, res);
     })
 
