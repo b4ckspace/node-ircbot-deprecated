@@ -43,7 +43,7 @@ var mpd;
 
 (COMMANDS['!addstream'] = function(sender, to, media){
     if(!media){
-        LOGGER.debug("no stream url %s, %s", %s, %s);
+        LOGGER.debug("no stream url %s, %s", sender, to);
         this.reply(sender, to, "stream url needed!");
         return;
     }
@@ -66,7 +66,7 @@ var mpd;
 
 (COMMANDS['!playstream'] = function(sender, to, media){
     if(!media){
-        LOGGER.debug("no stream url %s, %s", %s, %s);
+        LOGGER.debug("no stream url %s, %s", sender, to);
         this.reply(sender, to, "stream url needed!");
         return;
     }
@@ -98,7 +98,7 @@ var mpd;
     var args = Array.prototype.slice.call(arguments);
     var term = args.slice(2).join(' ');
     if(!term){
-        LOGGER.debug("no searchterm url %s, %s", %s, %s);
+        LOGGER.debug("no searchterm url %s, %s", sender, to);
         this.reply(sender, to, "search term needed!");
         return;
     }
