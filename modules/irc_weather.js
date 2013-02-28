@@ -75,7 +75,7 @@ var fetchWeatherByName = function(term, callback){
         that.reply(sender, to, res);
     })
 
-}).helptext = "get current weather data. format: !weather town[,country].";
+}).helptext = "get current weather data. format: !weather searchterm.";
 
 COMMANDS['!wetter'] = COMMANDS['!weather'];
 
