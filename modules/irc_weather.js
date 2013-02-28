@@ -56,6 +56,7 @@ var fetchWeatherByName = function(town, country, callback){
             callback(ret);
         });
     }).on('error', function(e) {
+        callback("api error.")
         LOGGER.error("Got http status error error: " + e.message);
     });
 };
@@ -81,13 +82,17 @@ var fetchWeatherByName = function(town, country, callback){
         if(!country)
             country="Germany";
     }
+    if(!town.match(/\w+[\s\w+]*\w+/)){
+        this.reply(sender, to, "no valid town given.");
+        return
+    }
     town=town.match(/\w+[\s\w+]*\w+/)[0];
     var that = this;
     fetchWeatherByName(town, country, function(res){
         that.reply(sender, to, res);
     })
 
-}).helptext = "get current weather data.";
+}).helptext = "get current weather data. format: !weather town[,country].";
 
 COMMANDS['!wetter'] = COMMANDS['!weather'];
 
