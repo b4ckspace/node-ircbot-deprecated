@@ -24,6 +24,11 @@ var spaceApi    = new bckspcApi();
     this.reply(sender, to, reply);
 }).helptext = 'get the members that are currently in the space.';
 
+(COMMANDS['blist'] = function(sender, to, command){
+    var reply = spaceApi.getMembers().join(', ') || 'nobody is in the space right now.';
+    this.reply(sender, to, reply);
+}).helptext = 'get the members that are currently in the space.';
+
 (COMMANDS['!pampus'] = function(sender, to, command){
     this.reply(sender, to, 'Dem Pampus fehlt Salz!');
 }).helptext = 'Dem Pampus fehlt Salz!';
