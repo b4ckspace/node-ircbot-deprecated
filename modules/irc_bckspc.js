@@ -24,6 +24,10 @@ var spaceApi    = new bckspcApi();
     this.reply(sender, to, reply);
 }).helptext = 'get the members that are currently in the space.';
 
+(COMMANDS[':q!'] = function(sender, to, command){
+    this.reply(sender, to, 'Thanks for flying Vim');
+}).helptext = 'fun goody vim command.';
+
 (COMMANDS['blist'] = function(sender, to, command){
     var reply = spaceApi.getMembers().join(', ') || 'nobody is in the space right now.';
     this.reply(sender, to, reply);
