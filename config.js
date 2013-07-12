@@ -22,4 +22,7 @@ exports.raven_url = env['raven_url'] || '';
 exports.webmessage_port = env['webmessage_port'] || '8042';
 exports.webmessage_pass = 'verysecret!!!!1111';
 
+exports.karma_min_accept = 10;
+exports.karma_accept_quota = 4;
+
 exports.modules = ['sentry', 'core', 'plenking', 'karma', 'bckspc', 'webrelais', 'mpd', 'github', 'weather', 'autovoice', 'webMessage'];

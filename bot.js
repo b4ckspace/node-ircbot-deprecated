@@ -61,6 +61,7 @@ var IrcBot = function(){
     this.channelwarn = {};
     this.nick = nick;
     this.loadModules();
+    this.config = config;
 };
 
 IrcBot.prototype.loadModules = function(){

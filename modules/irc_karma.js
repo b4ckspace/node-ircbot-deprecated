@@ -48,7 +48,57 @@ var karma_timeouts={};
     });
 }).helptext = "karma highscore";
 
+var transfercnt = 1;
+var transfers = {};
+(COMMANDS["!transfer"] = function(sender, to, target){
+    var that = this;
+    getKarma(sender function(karma){
+        if(karma==0)
+            return
+        var id = transfercnt;
+        transfercnt++;
+        var initdata = {
+            blacklist:[sender, target],
+            counter :0,
+            replyto: [sender, to]
+        };
+        transfers[i] = initdata;
+        that.reply(sender, to, "accept the request with !accept "+id+" via query")
+    });
+    //init transfer
+}).helptext = "transfer your karma to another account";
 
+(COMMANDS["!accept"] = function(sender, to, id){
+    var that = this;
+    if(!transfers[id]){
+        LOGGER.warn('invalid transfer id "%s", send by %s', id, sender);
+        that.reply(sender, to, 'invalid transfer id')
+        return
+    }
+    if(sender in transfers[id].blacklist){
+        LOGGER.warn("user %s is already in transfer blacklist for request %s", sender, id);
+        that.reply(sender, to, 'you have already accepted the transaction or are part of it.')
+        return
+    }
+    getKarma(sender function(karma){
+        var karma_required = that.config.karma_min_accept;
+        if(karma<karma_required){
+            LOGGER.warn('user %s has not enougth karma (%s<%s)to accept transfer request %s', sender, karma, karma_required, id);
+            that.reply(sender, to, 'you need at least' + karma_required + " karma");
+            return
+        }
+        transfers[id].counter++;
+        LOGGER.info("user %s accepted transfer request %s. request:");
+        var accept_quota = that.config.karma_accept_quota;
+        if(transfers[id].counter>=accept_quota){
+            var info = transfers[id];
+            that.reply(info.replyto[0], info.replyto[1], "karma transfer complete. maybe.")
+            LOGGER.error("karma transfer complete but not implemented :(")
+            transfers[id] = undefined;
+            //do the magic!
+        }
+    });
+}).helptext = "accept a karma transfer request";
 
 FILTERS.karma = function(message, sender, to){
     var karma_regex = /^([\w_\-\\\[\]\{\}\^`\|]+)[\s,:]*\+[\+1]/;
