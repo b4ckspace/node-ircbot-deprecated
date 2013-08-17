@@ -6,11 +6,102 @@ var CONFIG;
 var MODULE_NAME = "KARMA";
 
 var util        = require("util");
+var r           = require('rethinkdb');
+
 var nStore      = require('nstore');
 nStore          = nStore.extend(require('nstore/query')());
 var karma       = nStore.new('data/karma.db', function () {});
+var karma_alias = nStore.new('data/karma_alias.db', function () {});
 var karmaWait   = 60*1000;
-var karma_timeouts={};
+var karma_timeouts  = {};
+var db_dbname       = "ircbot";
+var db_karmatable   = "karma";
+
+var connection;
+var initDb = function(){
+    r.connect({host: 'localhost', port: 28015}, function(err, conn) {
+        if(err)
+            throw err;
+        LOGGER.debug('rethinkdb connection ok');
+        connection = conn;
+        validateDb();
+    });
+};
+
+var validateDb = function(){
+    r.dbList().run(connection, function(err, dbs){
+        if(err)
+            throw err
+        if(dbs.indexOf(db_dbname)==-1){
+            LOGGER.info('ircbot db does not exist, creating now');
+            r.dbCreate(db_dbname).run(connection, function(err, result){
+                if(err)
+                    throw err;
+                LOGGER.info('ircbot db created');
+                validateTable()
+            })
+        }else{
+            LOGGER.debug('found db, checking for table')
+            validateTable();
+        }
+    })
+};
+
+var validateTable = function(){
+    connection.use(db_dbname)
+    r.tableList().run(connection, function(err, tables){
+        if(err)
+            throw err;
+        if(tables.indexOf(db_karmatable)==-1){
+            LOGGER.info('karmatable does not exist, creating now');
+            r.tableCreate(db_karmatable).run(connection, function(err, result){
+                if(err)
+                    throw err;
+                LOGGER.info('karmatable created');
+            })
+        }else{
+            LOGGER.debug('karmatable exists')
+        }
+    })
+};
+
+var giveKarma = function(from, to){
+    r.table(db_karmatable).insert({
+        from:from,
+        to:to,
+        given:r.now()
+    }).run(connection, function(err, result){
+        if(err){
+            LOGGER.error('saving karma from %s for %s: %s', from, to, err)
+        }else{
+            LOGGER.info('karma from %s for %s saved', from, to)
+        }
+    })
+};
+
+var getKarma = function(user, callback){
+    r.table(db_karmatable).filter({"to":user}).count().run(connection, function(err, karma){
+        if(err)
+            throw err;
+        callback(karma);
+    });
+};
+
+var topKarma = function(callback){
+    r.table(db_karmatable).
+    groupBy("to", r.count).
+    map(function(elem){
+        return elem.merge({ "nick" : elem("group")("to"),
+                            "karma" : elem("reduction")}).
+                    pluck("nick", "karma")
+    }).orderBy(r.desc("score")).
+    limit(3).
+    run(connection, function(err, data){
+        if(err)
+            throw err;
+        callback(data.sort(function(a,b){return b.karma-a.karma}))
+    })
+};
 
 (COMMANDS['!karma'] = function(sender, to, user){
     var that = this;
@@ -29,22 +120,10 @@ var karma_timeouts={};
 
 (COMMANDS["!karmatop"] = function(sender, to){
     var that=this;
-    getAll(function(error, data){
-        if(error){
-            that.reply(sender, to, "error getting karma.");
-            return;
-        }
-        var karmanicks = [];
-        for(nick in data){
-            karmanicks.push({nick:nick, karma:data[nick].karma});
-        }
-        karmanicks = karmanicks .sort(function(a,b){return a.karma-b.karma})
-                                .reverse()
-                                .slice(0, 3)
-                                .map(function(u){return u.nick + ": " + u.karma})
+    topKarma(function(karmanicks){
+        karmanicks = karmanicks .map(function(u){return u.nick + ": " + u.karma})
                                 .join(', ');
         that.reply(sender, to, karmanicks)
-        //console.log(karmanicks);
     });
 }).helptext = "karma highscore";
 
@@ -52,7 +131,7 @@ var transfercnt = 1;
 var transfers = {};
 (COMMANDS["!transfer"] = function(sender, to, target){
     var that = this;
-    getKarma(sender function(karma){
+    getKarma(function(karma){
         if(karma==0)
             return
         var id = transfercnt;
@@ -60,6 +139,7 @@ var transfers = {};
         var initdata = {
             blacklist:[sender, target],
             counter :0,
+            target: target,
             replyto: [sender, to]
         };
         transfers[i] = initdata;
@@ -80,7 +160,7 @@ var transfers = {};
         that.reply(sender, to, 'you have already accepted the transaction or are part of it.')
         return
     }
-    getKarma(sender function(karma){
+    getKarma(function(karma){
         var karma_required = that.config.karma_min_accept;
         if(karma<karma_required){
             LOGGER.warn('user %s has not enougth karma (%s<%s)to accept transfer request %s', sender, karma, karma_required, id);
@@ -124,7 +204,7 @@ FILTERS.karma = function(message, sender, to){
     }
     this.irc_client.once('names'+to, function(names){
         if(names[nick] != undefined){
-            addKarma(nick);
+            giveKarma(sender, nick);
             LOGGER.info('%s gave %s karma (%s)', sender, nick, to);
             karma_timeouts[sender] = true;
             setTimeout(function(){
@@ -142,34 +222,11 @@ FILTERS.karma = function(message, sender, to){
 module.exports = function(cfg, log, bot){
     LOGGER = log.getLogger(MODULE_NAME);
     CONFIG = cfg;
+    initDb();
     for(key in FILTERS){
         bot.filters[key] = FILTERS[key];
     }
     return {commands:COMMANDS};
-};
-
-var addKarma = function(user){
-    getKarma(user, function(count){
-        karma.save(user, {karma: count+1}, function (err) {
-            if (err) {
-                LOGGER.error("save error: " + util.inspect(err));
-                return;
-            }
-            LOGGER.info("saved %s karma for %s", count+1, user);
-        });
-    });
-};
-
-var getKarma = function(user, callback){
-    karma.get(user, function (err, doc, key) {
-        if (err) {
-            //console.log(err);
-            callback(0);
-            return;
-        }
-        //console.log(doc);
-        callback(doc.karma);
-    });
 };
 
 var getAll = function(callback){
@@ -181,4 +238,8 @@ var getAll = function(callback){
         }
         callback(error, data);
     });
+};
+
+var getAlias = function(user, cb){
+
 };

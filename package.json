@@ -33,7 +33,8 @@
         "nstore":    "0.5.x",
         "log4js":    "0.5.x",
         "github":    "0.1.x",
-        "sprintf":    "0.1.x"
+        "sprintf":   "0.1.x",
+        "rethinkdb": "1.8.0-0"
     },
     "engine": {
         "node": ">=0.6"
