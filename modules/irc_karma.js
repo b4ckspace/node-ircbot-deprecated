@@ -16,6 +16,7 @@ var karmaWait   = 60*1000;
 var karma_timeouts  = {};
 var db_dbname       = "ircbot";
 var db_karmatable   = "karma";
+var db_karmaalias   = "karmaalias"
 
 var connection;
 var initDb = function(){
@@ -42,12 +43,12 @@ var validateDb = function(){
             })
         }else{
             LOGGER.debug('found db, checking for table')
-            validateTable();
+            validateTable_karma();
         }
     })
 };
 
-var validateTable = function(){
+var validateTable_karma = function(){
     connection.use(db_dbname)
     r.tableList().run(connection, function(err, tables){
         if(err)
@@ -58,9 +59,27 @@ var validateTable = function(){
                 if(err)
                     throw err;
                 LOGGER.info('karmatable created');
+                validateTable_karmaalias();
             })
         }else{
-            LOGGER.debug('karmatable exists')
+            LOGGER.debug('karmatable exists');
+            validateTable_karmaalias();
+        }
+    })
+};
+var validateTable_karmaalias = function(){
+    r.tableList().run(connection, function(err, tables){
+        if(err)
+            throw err;
+        if(tables.indexOf(db_karmaalias)==-1){
+            LOGGER.info('karmaalias table does not exist, creating now');
+            r.tableCreate(db_karmaalias).run(connection, function(err, result){
+                if(err)
+                    throw err;
+                LOGGER.info('karmaalias table created');
+            })
+        }else{
+            LOGGER.debug('karmaalias table exists')
         }
     })
 };
@@ -94,7 +113,7 @@ var topKarma = function(callback){
         return elem.merge({ "nick" : elem("group")("to"),
                             "karma" : elem("reduction")}).
                     pluck("nick", "karma")
-    }).orderBy(r.desc("score")).
+    }).orderBy(r.desc("karma")).
     limit(3).
     run(connection, function(err, data){
         if(err)
