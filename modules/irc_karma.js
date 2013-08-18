@@ -99,7 +99,18 @@ var giveKarma = function(from, to){
 };
 
 var getKarma = function(user, callback){
-    r.table(db_karmatable).filter({"to":user}).count().run(connection, function(err, karma){
+    r.table(db_karmatable).
+    filter({"to":user}).
+    count().
+    add(
+        r.db("ircbot").
+        table(db_karmaalias).
+        filter({"to":user}).
+        map(function(elem){
+            return r.db("ircbot").table(db_karmatable).filter({"to":elem("from")}).count()
+        }).reduce(function(acc, val){return acc.add(val)},0)
+    ).
+    run(connection, function(err, karma){
         if(err)
             throw err;
         callback(karma);
