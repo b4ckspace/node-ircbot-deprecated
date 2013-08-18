@@ -171,19 +171,27 @@ var transfercnt = 1;
 var transfers = {};
 (COMMANDS["!transfer"] = function(sender, to, target){
     var that = this;
-    getKarma(function(karma){
-        if(karma==0)
-            return
-        var id = transfercnt;
-        transfercnt++;
+    if(!target){
+        this.reply(sender, to, "no target given. see command help for more.")
+        return;
+    }
+    //channel test
+    getKarma(sender, function(karma){
+        if(karma==0){
+            this.reply(sender, to, "you can't add an alias for an account with 0 karma.")
+            return;
+        }
+        var id = transfercnt++;
+        id = id + "-" + target
         var initdata = {
             blacklist:[sender, target],
             counter :0,
+            source: sender,
             target: target,
             replyto: [sender, to]
         };
-        transfers[i] = initdata;
-        that.reply(sender, to, "accept the request with !accept "+id+" via query")
+        transfers[id] = initdata;
+        that.reply(sender, to, "accept the request with !accept "+id+" via query", true);
     });
     //init transfer
 }).helptext = "transfer your karma to another account";
@@ -195,27 +203,28 @@ var transfers = {};
         that.reply(sender, to, 'invalid transfer id')
         return
     }
-    if(sender in transfers[id].blacklist){
+    if(transfers[id].blacklist.indexOf(sender)!=-1){
         LOGGER.warn("user %s is already in transfer blacklist for request %s", sender, id);
         that.reply(sender, to, 'you have already accepted the transaction or are part of it.')
         return
     }
-    getKarma(function(karma){
+    getKarma(sender, function(karma){
         var karma_required = that.config.karma_min_accept;
         if(karma<karma_required){
-            LOGGER.warn('user %s has not enougth karma (%s<%s)to accept transfer request %s', sender, karma, karma_required, id);
-            that.reply(sender, to, 'you need at least' + karma_required + " karma");
+            LOGGER.warn('user %s has not enougth karma (%s<%s) to accept transfer request %s', sender, karma, karma_required, id);
+            that.reply(sender, to, 'you need at least ' + karma_required + " karma");
             return
         }
         transfers[id].counter++;
-        LOGGER.info("user %s accepted transfer request %s. request:");
+        LOGGER.info("user %s accepted transfer request %s. counter: %s", sender, id, transfers[id].counter);
         var accept_quota = that.config.karma_accept_quota;
         if(transfers[id].counter>=accept_quota){
             var info = transfers[id];
-            that.reply(info.replyto[0], info.replyto[1], "karma transfer complete. maybe.")
-            LOGGER.error("karma transfer complete but not implemented :(")
+            that.reply(info.replyto[0], info.replyto[1], "karma transfer complete. maybe.", true)
+            LOGGER.info("writing karma transfer to db");
+            
             transfers[id] = undefined;
-            //do the magic!
+            addAlias(info.source, info.target)
         }
     });
 }).helptext = "accept a karma transfer request";
@@ -277,6 +286,34 @@ var getAll = function(callback){
             error = true;
         }
         callback(error, data);
+    });
+};
+
+var addAlias = function(from, to){
+    //avoid cycles and chains
+    r.db("ircbot").
+    table(db_karmaalias).
+    filter({"from":to}).
+    delete().
+    run(connection, function(err, res){
+        if(err)
+            throw err;  
+    })
+
+    r.db("ircbot").
+    table(db_karmaalias).
+    filter({"from":from}).
+    delete().
+    run(connection, function(err, res){
+        if(err)
+            throw err;
+        r.db("ircbot").table(db_karmaalias).insert({
+            from:from,
+            to:to
+        }).run(connection, function(err, res){
+            if(err)
+                throw err;  
+        })
     });
 };
 
