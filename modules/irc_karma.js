@@ -8,10 +8,6 @@ var MODULE_NAME = "KARMA";
 var util        = require("util");
 var r           = require('rethinkdb');
 
-var nStore      = require('nstore');
-nStore          = nStore.extend(require('nstore/query')());
-var karma       = nStore.new('data/karma.db', function () {});
-var karma_alias = nStore.new('data/karma_alias.db', function () {});
 var karmaWait   = 60*1000;
 var karma_timeouts  = {};
 var db_dbname       = "ircbot";
@@ -85,6 +81,8 @@ var validateTable_karmaalias = function(){
 };
 
 var giveKarma = function(from, to){
+    from = from.toLowerCase();
+    to = to.toLowerCase();
     r.table(db_karmatable).insert({
         from:from,
         to:to,
@@ -99,6 +97,7 @@ var giveKarma = function(from, to){
 };
 
 var getKarma = function(user, callback){
+    user = user.toLowerCase();
     r.table(db_karmatable).
     filter({"to":user}).
     count().
@@ -290,6 +289,8 @@ var getAll = function(callback){
 };
 
 var addAlias = function(from, to){
+    from = from.toLowerCase();
+    to = to.toLowerCase();
     //avoid cycles and chains
     r.db("ircbot").
     table(db_karmaalias).
