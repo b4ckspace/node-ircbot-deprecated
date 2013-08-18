@@ -107,13 +107,23 @@ var getKarma = function(user, callback){
 };
 
 var topKarma = function(callback){
-    r.table(db_karmatable).
-    groupBy("to", r.count).
-    map(function(elem){
-        return elem.merge({ "nick" : elem("group")("to"),
-                            "karma" : elem("reduction")}).
-                    pluck("nick", "karma")
-    }).orderBy(r.desc("karma")).
+    r.db("ircbot").table(db_karmatable).
+        groupBy("to", r.count).
+        map(function(elem){
+            return elem.merge({ "nick" : elem("group")("to"),
+                                "karma" : r.add(elem("reduction"), 
+                r.db("ircbot").
+                    table(db_karmaalias).
+                    filter({"to":elem("group")("to")}).
+                    map(function(elem){
+                        return r.db("ircbot").table(db_karmatable).filter({"to":elem("from")}).count()
+                    }).
+                    reduce(function(acc, val){return acc.add(val)},0) )
+            } 
+        )
+    }).
+    pluck("nick", "karma").
+    orderBy(r.desc("karma")).
     limit(3).
     run(connection, function(err, data){
         if(err)
