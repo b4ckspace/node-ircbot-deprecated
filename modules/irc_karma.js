@@ -35,7 +35,7 @@ var validateDb = function(){
                 if(err)
                     throw err;
                 LOGGER.info('ircbot db created');
-                validateTable()
+                validateTabl_karma()
             })
         }else{
             LOGGER.debug('found db, checking for table')
